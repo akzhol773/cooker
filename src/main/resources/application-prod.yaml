@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://viaduct.proxy.rlwy.net:46500/railway
+    username: postgres
+    password: ORwQOXtLrJQvqGkyPErwBGWImVWhxkbU

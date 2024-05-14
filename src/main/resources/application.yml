@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: true
+    defer-datasource-initialization: true
+    show-sql: true
+  main:
+    banner-mode: off
+  logging:
+    level:
+      org:
+        springframework:
+          security: debug
+      sql: debug
+  profiles:
+    active: prod
+  server:
+    port: 8080
+  sql:
+    init:
+      mode: always
+jwt:
+  secret: "716f6f496e21776646527c5d7e2d4d4c205b382f6c392c267e512e2349"
+token-expiration-time: 15
+
+
+
+
