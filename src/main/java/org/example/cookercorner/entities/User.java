@@ -35,9 +35,7 @@ public class User implements UserDetails {
 
     String biography;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "image_id")
-    Image photo;
+    String photoUrl;
 
     @ManyToMany
     @JoinTable(

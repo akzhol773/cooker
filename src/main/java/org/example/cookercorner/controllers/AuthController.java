@@ -14,9 +14,16 @@ import lombok.experimental.FieldDefaults;
 
 import org.example.cookercorner.dtos.*;
 import org.example.cookercorner.services.AuthService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @RestController
 @RequiredArgsConstructor
@@ -57,6 +64,26 @@ public class AuthController {
         return  ResponseEntity.ok().body(authService.createNewUser(registrationUserDto));
     }
 
+
+//    @PostMapping("/upload")
+//    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+//        try {
+//            // Define the upload directory
+//            Path uploadPath = Paths.get("uploads");
+//
+//            // Ensure the uploads directory exists
+//            if (!Files.exists(uploadPath)) {
+//                Files.createDirectories(uploadPath);
+//            }
+//
+//            // Save the file to the local file system
+//            Path filePath = uploadPath.resolve(file.getOriginalFilename());
+//            Files.write(filePath, file.getBytes());
+//            return ResponseEntity.ok("File uploaded successfully");
+//        } catch (IOException e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed");
+//        }
+//    }
 
 
 }
