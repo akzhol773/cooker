@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.cookercorner.entities.User;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -54,6 +55,19 @@ public class JwtTokenUtils {
                 .setExpiration(new Date(Instant.now().plus(tokenExpirationTime, ChronoUnit.MINUTES).toEpochMilli()))
                 .signWith(getAccessKey())
                 .compact();
+    }
+
+    public Long getUserIdFromAuthentication(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof User) {
+                User user = (User) principal;
+                return user.getId();
+            } else {
+                throw new IllegalArgumentException("Principal is not an instance of User");
+            }
+        }
+        return null;
     }
 
     public String getUsername(String token) {
