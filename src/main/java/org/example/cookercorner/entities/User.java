@@ -12,10 +12,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
@@ -35,23 +37,14 @@ public class User implements UserDetails {
 
     String biography;
 
-    String photoUrl;
+    String photo;
 
-    @ManyToMany
-    @JoinTable(
-            name = "following",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "following_id")
-    )
-    List<User> followings = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "follower",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "follower_id")
-    )
-    List<User> followers = new ArrayList<>();
+    @ElementCollection
+    List<Long> followings = new ArrayList<>();
+
+    @ElementCollection
+    List<Long> followers = new ArrayList<>();
 
     @CreationTimestamp
     LocalDateTime createdDate;
@@ -59,21 +52,13 @@ public class User implements UserDetails {
     @UpdateTimestamp
     LocalDateTime updatedDate;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
-    )
-    List<Role> roles = new ArrayList<>();
+
+    @Column(nullable = false)
+    String role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        for (Role role : roles) {
-            authorities.add(new SimpleGrantedAuthority(role.getName()));
-        }
-        return authorities;
+        return Collections.singletonList(new SimpleGrantedAuthority(role));
     }
 
     @Override

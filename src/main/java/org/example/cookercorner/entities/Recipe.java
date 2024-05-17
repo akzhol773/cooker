@@ -37,21 +37,11 @@ public class Recipe {
 
     String cookingTime;
 
-    @ManyToMany
-    @JoinTable(
-            name = "recipe_likes",
-            joinColumns = @JoinColumn(name = "recipe_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    List<User> likes = new ArrayList<>();
+    @ElementCollection
+    List<Long> likes = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "recipe_saves",
-            joinColumns = @JoinColumn(name = "recipe_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    List<User> saves = new ArrayList<>();
+    @ElementCollection
+    List<Long> saves = new ArrayList<>();
 
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
@@ -61,7 +51,7 @@ public class Recipe {
     @JoinColumn(name = "user_id")
     User createdBy;
 
-    String photoUrl;
+    String photo;
 
     @CreationTimestamp
     Date createdDate;
