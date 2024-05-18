@@ -27,8 +27,8 @@ import java.nio.file.Paths;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/auth/")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequestMapping("api/auth/")
 public class AuthController {
 
     AuthService authService;
@@ -64,26 +64,6 @@ public class AuthController {
         return  ResponseEntity.ok().body(authService.createNewUser(registrationUserDto));
     }
 
-
-//    @PostMapping("/upload")
-//    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
-//        try {
-//            // Define the upload directory
-//            Path uploadPath = Paths.get("uploads");
-//
-//            // Ensure the uploads directory exists
-//            if (!Files.exists(uploadPath)) {
-//                Files.createDirectories(uploadPath);
-//            }
-//
-//            // Save the file to the local file system
-//            Path filePath = uploadPath.resolve(file.getOriginalFilename());
-//            Files.write(filePath, file.getBytes());
-//            return ResponseEntity.ok("File uploaded successfully");
-//        } catch (IOException e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed");
-//        }
-//    }
 
 
 }
