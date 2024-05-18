@@ -6,6 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.example.cookercorner.dtos.MyProfileDto;
+import org.example.cookercorner.dtos.UserDto;
+import org.example.cookercorner.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -16,38 +22,11 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@AllArgsConstructor
 @RequestMapping("api/users/")
 public class UserController {
-    private final JwtTokenUtils tokenUtils;
-    private final UserService userService;
-    private final ObjectMapper objectMapper;
-    private final JsonValidator jsonValidator;
-
-    public UserController(JwtTokenUtils tokenUtils, UserService userService, ObjectMapper objectMapper, JsonValidator jsonValidator) {
-        this.tokenUtils = tokenUtils;
-        this.userService = userService;
-        this.objectMapper = objectMapper;
-        this.jsonValidator = jsonValidator;
-    }
-
-    @Operation(
-            summary = "Get user profile",
-            description = "Get user profile using user id",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "User profile"),
-                    @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
-                    @ApiResponse(responseCode = "403", description = "Authentication required")
-            }
-    )
-    @GetMapping("/get_user_profile/{userId}")
-    public ResponseEntity<UserProfileDto> getRecipesByUser(@PathVariable Long userId, Authentication authentication) {
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
-        }
-        Long currentUserId = tokenUtils.getUserIdFromAuthentication(authentication);
-        return userService.getUserProfile(userId, currentUserId);
-    }
+    UserService userService;
 
     @Operation(
             summary = "Search user",
@@ -58,10 +37,11 @@ public class UserController {
                     @ApiResponse(responseCode = "403", description = "Authentication required")
             }
     )
-    @GetMapping("/search")
+    @GetMapping("/search-user")
     public ResponseEntity<List<UserDto>> search(@RequestParam(name = "query") String query) {
         return ResponseEntity.ok(userService.searchUser(query));
     }
+
 
     @Operation(
             summary = "Get own profile",
@@ -72,13 +52,8 @@ public class UserController {
             }
     )
     @GetMapping("/my_profile")
-    public ResponseEntity<MyProfileDto> getRecipesByUser(Authentication authentication) {
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
-        }
-        Long currentUserId = tokenUtils.getUserIdFromAuthentication(authentication);
-        return userService.getOwnProfile(currentUserId);
+    public ResponseEntity<MyProfileDto> getMyProfile(Authentication authentication) {
+        return ResponseEntity.ok(userService.getMyProfile(authentication));
     }
 
 

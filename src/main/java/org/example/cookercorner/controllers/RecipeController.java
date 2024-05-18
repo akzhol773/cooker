@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.cookercorner.component.JsonValidator;
@@ -27,7 +28,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
+@AllArgsConstructor
 @RequestMapping("api/recipes")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RecipeController {
@@ -171,7 +172,7 @@ public class RecipeController {
                     @ApiResponse(responseCode = "403", description = "Authentication required")
             }
     )
-    @GetMapping("/search")
+    @GetMapping("/search-recipe")
     public ResponseEntity<List<RecipeListDto>> search(@RequestParam(name = "query")String query, Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");

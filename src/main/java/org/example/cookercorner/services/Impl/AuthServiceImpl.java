@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
         if (!registrationUserDto.password().equals(registrationUserDto.confirmPassword())) {
             throw new PasswordNotMatchException("Passwords do not match.");
         }
-        userRepository.save(userMapper.toEntity(registrationUserDto, "USER_ROLE", passwordEncoder));
+        userRepository.save(userMapper.toEntity(registrationUserDto, passwordEncoder));
         return "User created successfully!";
     }
 

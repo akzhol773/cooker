@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -21,11 +22,24 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM user_followings WHERE user_id = :currentUserId AND following_id = :userId", nativeQuery = true)
-    boolean unfollowUser(@Param("currentUserId") Long currentUserId, @Param("userId") Long userId);
+    void unfollowUser(@Param("currentUserId") Long currentUserId, @Param("userId") Long userId);
 
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM user_followers WHERE user_id = :userId AND follower_id = :currentUserId", nativeQuery = true)
-    boolean removeFollower(@Param("userId") Long userId, @Param("currentUserId") Long currentUserId);
+    void removeFollower(@Param("userId") Long userId, @Param("currentUserId") Long currentUserId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO user_followings (user_id, following_id) VALUES (:currentUserId, :userId) ON CONFLICT DO NOTHING", nativeQuery = true)
+    void followUser(@Param("currentUserId") Long currentUserId, @Param("userId") Long userId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO user_followers (user_id, follower_id) VALUES (:userId, :currentUserId) ON CONFLICT DO NOTHING", nativeQuery = true)
+    void addFollower(@Param("userId") Long userId, @Param("currentUserId") Long currentUserId);
+
+    @Query("SELECT c FROM User c WHERE c.name LIKE CONCAT('%', :query, '%')")
+    List<User> searchUsers(@Param("query") String query);
 
 }
