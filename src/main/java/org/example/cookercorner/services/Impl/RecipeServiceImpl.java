@@ -151,5 +151,10 @@ public class RecipeServiceImpl implements RecipeService {
         recipeRepository.saveRecipeForUser(recipe.getId(), user.getId());
     }
 
+    @Override
+    public int getUserRecipeQuantity(User user) {
+        return recipeRepository.getUserRecipeQuantity(user);
+    }
+
 
 }

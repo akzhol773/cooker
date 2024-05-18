@@ -4,6 +4,7 @@ import org.example.cookercorner.dtos.RecipeDto;
 import org.example.cookercorner.dtos.RecipeListDto;
 import org.example.cookercorner.dtos.RecipeRequestDto;
 import org.example.cookercorner.entities.Recipe;
+import org.example.cookercorner.entities.User;
 import org.example.cookercorner.enums.Category;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,4 +39,6 @@ public interface RecipeService {
     void removeSaveFromRecipe(Long recipeId, Long currentUserId);
 
     void putSaveIntoRecipe(Long recipeId, Long currentUserId);
+
+    int getUserRecipeQuantity(User user);
 }

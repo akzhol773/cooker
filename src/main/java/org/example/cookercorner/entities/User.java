@@ -39,7 +39,6 @@ public class User implements UserDetails {
 
     String photo;
 
-
     @ElementCollection
     List<Long> followings = new ArrayList<>();
 

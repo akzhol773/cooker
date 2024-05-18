@@ -13,6 +13,7 @@ import org.example.cookercorner.exceptions.NotAuthorizedException;
 import org.example.cookercorner.exceptions.UserNotFoundException;
 import org.example.cookercorner.mapper.UserMapper;
 import org.example.cookercorner.repositories.UserRepository;
+import org.example.cookercorner.services.RecipeService;
 import org.example.cookercorner.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     UserMapper userMapper;
     JwtTokenUtils jwtTokenUtils;
+    RecipeService recipeService;
 
     @Override
     public Optional<User> findUserByEmail(String email) {
@@ -81,7 +83,8 @@ public class UserServiceImpl implements UserService {
         }
         Long currentUserId = jwtTokenUtils.getUserIdFromAuthentication(authentication);
         User user = userRepository.findById(currentUserId).orElseThrow(()-> new UsernameNotFoundException("User not found"));
-        return userMapper.toMyProfileDto(user);
+        String photoUrl = (user.getPhoto() != null) ? user.getPhoto() : "https://t4.ftcdn.net/jpg/03/32/59/65/240_F_332596535_lAdLhf6KzbW6PWXBWeIFTovTii1drkbT.jpg";
+        return userMapper.toMyProfileDto(user, photoUrl, recipeService.getUserRecipeQuantity(user));
     }
 }
 

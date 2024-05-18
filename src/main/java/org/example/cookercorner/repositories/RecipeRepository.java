@@ -52,6 +52,10 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     @Transactional
     @Query(value = "INSERT INTO recipe_saves (recipe_id, user_id) VALUES (:recipeId, :userId) ON CONFLICT DO NOTHING", nativeQuery = true)
     void saveRecipeForUser(@Param("recipeId") Long recipeId, @Param("userId") Long userId);
+
+
+    @Query("SELECT COUNT(r) FROM Recipe r WHERE r.createdBy = :user")
+    int getUserRecipeQuantity(@Param("user") User user);
 }
 
 

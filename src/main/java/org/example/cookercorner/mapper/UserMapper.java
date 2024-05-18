@@ -40,7 +40,16 @@ public class UserMapper {
         return userDto;
     }
 
-    public MyProfileDto toMyProfileDto(User user) {
 
+    public MyProfileDto toMyProfileDto(User user, String photoUrl, int userRecipeQuantity) {
+
+       return new MyProfileDto(
+                photoUrl,
+                user.getName(),
+                userRecipeQuantity,
+                user.getFollowers().size(),
+                user.getFollowings().size(),
+                user.getBiography()
+        );
     }
 }
