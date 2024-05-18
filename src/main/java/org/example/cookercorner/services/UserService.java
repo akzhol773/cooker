@@ -12,4 +12,6 @@ public interface UserService {
     boolean isFollowed(Long userId, Long currentUserId);
 
     void unfollowUser(Long userId, Long currentUserId);
+
+    void followUser(Long userId, Long currentUserId);
 }

@@ -32,24 +32,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean isFollowed(Long userId, Long currentUserId) {
-        return userRepository.isFollowedByUser(userId, currentUserId);
+        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User to unfollow not found"));
+        User currentUser = userRepository.findById(currentUserId).orElseThrow(() -> new UsernameNotFoundException("Current user not found"));
+        return userRepository.isFollowedByUser(user.getId(), currentUser.getId());
     }
 
     @Override
     public void unfollowUser(Long userId, Long currentUserId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User to unfollow not found"));
         User currentUser = userRepository.findById(currentUserId).orElseThrow(() -> new UsernameNotFoundException("Current user not found"));
-        // Remove the follow relationship
-        int followingsDeleted = userRepository.unfollowUser(currentUserId, userId);
-        if (followingsDeleted == 0) {
+        boolean isFollowingDeleted = userRepository.unfollowUser(currentUser.getId(), user.getId());
+        if (isFollowingDeleted == false) {
             throw new IllegalStateException("User was not being followed.");
         }
-
-        // Remove the follower relationship
-        int followersDeleted = userRepository.removeFollower(userId, currentUserId);
-        if (followersDeleted == 0) {
+        boolean isFollowerDeleted = userRepository.removeFollower(user.getId(), currentUser.getId());
+        if (isFollowerDeleted == false) {
             throw new IllegalStateException("Current user was not a follower of the user to unfollow.");
         }
+
+    }
+
+    @Override
+    public void followUser(Long userId, Long currentUserId) {
 
     }
 }

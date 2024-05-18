@@ -21,11 +21,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM user_followings WHERE user_id = :currentUserId AND following_id = :userId", nativeQuery = true)
-    void unfollowUser(@Param("currentUserId") Long currentUserId, @Param("userId") Long userId);
+    boolean unfollowUser(@Param("currentUserId") Long currentUserId, @Param("userId") Long userId);
 
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM user_followers WHERE user_id = :userId AND follower_id = :currentUserId", nativeQuery = true)
-    void removeFollower(@Param("userId") Long userId, @Param("currentUserId") Long currentUserId);
+    boolean removeFollower(@Param("userId") Long userId, @Param("currentUserId") Long currentUserId);
 
 }
