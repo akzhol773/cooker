@@ -1,15 +1,14 @@
 package org.example.cookercorner.services.Impl;
 
+import jakarta.transaction.Transactional;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.example.cookercorner.services.ImageService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 @Service
 public class ImageServiceImpl implements ImageService {
     @Override
@@ -19,6 +18,7 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
+    @Transactional
     public String saveImage(MultipartFile image) throws FileUploadException {
         try {
             Path uploadPath = Paths.get("recipe_images");

@@ -2,6 +2,7 @@ package org.example.cookercorner.services.Impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -40,9 +41,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RecipeServiceImpl implements RecipeService {
 
@@ -90,7 +90,7 @@ public class RecipeServiceImpl implements RecipeService {
         User user = getUser(jwtTokenUtils.getUserIdFromAuthentication(authentication));
         boolean isSaved = recipeRepository.isRecipeSavedByUser(recipeId, user.getId());
         boolean isLiked = recipeRepository.isRecipeLikedByUser(recipeId, user.getId());
-        return recipeMapper.toRecipeDto(getRecipe(recipeId), user.getId(), isLiked, isSaved);
+        return recipeMapper.toRecipeDto(getRecipe(recipeId), isLiked, isSaved);
     }
 
 
@@ -109,11 +109,13 @@ public class RecipeServiceImpl implements RecipeService {
 
 
     @Override
+    @Transactional
     public void removeLikeFromRecipe(Long recipeId, Long currentUserId) {
         recipeRepository.removeLikeFromRecipe(getRecipe(recipeId).getId(), getUser(currentUserId));
     }
 
     @Override
+    @Transactional
     public void putLikeIntoRecipe(Long recipeId, Long currentUserId) {
         recipeRepository.putLikeIntoRecipe(getRecipe(recipeId).getId(), getUser(currentUserId).getId());
     }
@@ -125,11 +127,13 @@ public class RecipeServiceImpl implements RecipeService {
 
 
     @Override
+    @Transactional
     public void removeSaveFromRecipe(Long recipeId, Long currentUserId) {
         recipeRepository.removeSaveFromRecipe(getRecipe(recipeId).getId(), getUser(currentUserId).getId());
     }
 
     @Override
+    @Transactional
     public void putSaveIntoRecipe(Long recipeId, Long currentUserId) {
         recipeRepository.saveRecipeForUser(getRecipe(recipeId).getId(), getUser(currentUserId).getId());
     }
@@ -146,6 +150,7 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
+    @Transactional
     public String addRecipe(String recipeDto, MultipartFile image, Authentication authentication) throws FileUploadException {
         checkAuthentication(authentication);
 

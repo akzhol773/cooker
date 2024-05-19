@@ -1,6 +1,7 @@
 package org.example.cookercorner.services.Impl;
 
 
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -12,9 +13,9 @@ import org.example.cookercorner.services.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-
-@AllArgsConstructor
 @Service
+@Transactional
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ActionServiceImpl implements ActionService {
     JwtTokenUtils jwtTokenUtils;

@@ -7,8 +7,6 @@ import org.example.cookercorner.entities.Recipe;
 import org.example.cookercorner.entities.User;
 import org.example.cookercorner.enums.Category;
 import org.example.cookercorner.enums.Difficulty;
-import org.example.cookercorner.exceptions.RecipeNotFoundException;
-import org.example.cookercorner.repositories.RecipeRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -30,7 +28,7 @@ public class RecipeMapper {
         );
     }
 
-    public RecipeDto toRecipeDto(Recipe recipe, Long userId, boolean isLiked, boolean isSaved) {
+    public RecipeDto toRecipeDto(Recipe recipe, boolean isLiked, boolean isSaved) {
         return new RecipeDto(
                 recipe.getId(),
                 recipe.getRecipeName(),
@@ -49,7 +47,7 @@ public class RecipeMapper {
 
     private List<IngredientDto> mapIngredients(List<Ingredient> ingredients) {
         return ingredients.stream()
-                .map(ingredient -> new IngredientDto(ingredient.getId(), ingredient.getName(), ingredient.getAmount()))
+                .map(ingredient -> new IngredientDto(ingredient.getId(), ingredient.getName(), ingredient.getAmount(), ingredient.getUnitOfMeasurement()))
                 .collect(Collectors.toList());
     }
 

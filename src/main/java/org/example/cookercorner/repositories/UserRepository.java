@@ -42,4 +42,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT c FROM User c WHERE c.name LIKE CONCAT('%', :query, '%')")
     List<User> searchUsers(@Param("query") String query);
 
+    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END " +
+            "FROM User u JOIN u.followings f " +
+            "WHERE u.id = :currentUserId AND f = :userId")
+    boolean isUserFollowing(@Param("currentUserId") Long currentUserId, @Param("userId") Long userId);
+
 }

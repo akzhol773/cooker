@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(RecipeNotFoundException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<Object> handleRecipeNotFoundException(
             RecipeNotFoundException ex) {
         UUID exceptionUUID = UUID.randomUUID();
@@ -34,13 +34,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(FileUploadException.class)
     public ResponseEntity<String> handleFileUploadException(FileUploadException ex, WebRequest request) {
-        // Log the exception (optional)
-        // log.error("File upload failed", ex);
-
-        // Create a custom response message
         String errorMessage = ex.getMessage();
-
-        // Return the response entity with appropriate HTTP status and message
         return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
     }
 
@@ -87,6 +81,30 @@ public class GlobalExceptionHandler {
         ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(InvalidJsonException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> handleInvalidJsonException(
+            InvalidJsonException ex) {
+        UUID exceptionUUID = UUID.randomUUID();
+        log.error("Exception UUID: {}", exceptionUUID, ex);
+        ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
+        return new ResponseEntity<>(exceptionDto, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<Object> handleUserNotFoundException(
+            UserNotFoundException ex) {
+        UUID exceptionUUID = UUID.randomUUID();
+        log.error("Exception UUID: {}", exceptionUUID, ex);
+        ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
+        return new ResponseEntity<>(exceptionDto, HttpStatus.NOT_FOUND);
+    }
+
+
+
+
 
 
 

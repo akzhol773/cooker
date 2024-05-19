@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.example.cookercorner.dtos.MyProfileDto;
-import org.example.cookercorner.dtos.UserDto;
+import org.example.cookercorner.dtos.UserSearchDto;
+import org.example.cookercorner.dtos.UserProfileDto;
 import org.example.cookercorner.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -35,7 +36,7 @@ public class UserController {
             }
     )
     @GetMapping("/search-user")
-    public ResponseEntity<List<UserDto>> search(@RequestParam(name = "query") String query) {
+    public ResponseEntity<List<UserSearchDto>> search(@RequestParam(name = "query") String query) {
         return ResponseEntity.ok(userService.searchUser(query));
     }
 
@@ -48,7 +49,7 @@ public class UserController {
                     @ApiResponse(responseCode = "403", description = "Authentication required")
             }
     )
-    @GetMapping("/my_profile")
+    @GetMapping("/get-my-profile")
     public ResponseEntity<MyProfileDto> getMyProfile(Authentication authentication) {
         return ResponseEntity.ok(userService.getMyProfile(authentication));
     }
@@ -62,11 +63,27 @@ public class UserController {
                     @ApiResponse(responseCode = "403", description = "Authentication required")
             }
     )
-    @PutMapping("/update_profile")
+    @PutMapping("/update-my-profile")
     public ResponseEntity<String> changeProfile(@RequestPart("dto") String profileDto,
                                                 @RequestPart(value = "image", required = false) MultipartFile image,
                                                 Authentication authentication) throws FileUploadException {
        return ResponseEntity.ok(userService.updateProfile(profileDto, image, authentication));
     }
+
+    @Operation(
+            summary = "Get user profile",
+            description = "Get user profile using user id",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "User profile"),
+                    @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
+                    @ApiResponse(responseCode = "403", description = "Authentication required")
+            }
+    )
+    @GetMapping("/get-user-profile/{userId}")
+    public ResponseEntity<UserProfileDto> getRecipesByUser(@PathVariable Long userId, Authentication authentication) {
+
+      return ResponseEntity.ok(userService.getUserProfileById(userId, authentication));
+    }
+
 
 }

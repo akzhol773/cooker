@@ -10,7 +10,8 @@ import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.example.cookercorner.component.JsonValidator;
 import org.example.cookercorner.component.JwtTokenUtils;
 import org.example.cookercorner.dtos.MyProfileDto;
-import org.example.cookercorner.dtos.UserDto;
+import org.example.cookercorner.dtos.UserSearchDto;
+import org.example.cookercorner.dtos.UserProfileDto;
 import org.example.cookercorner.dtos.UserUpdateProfileDto;
 import org.example.cookercorner.entities.User;
 import org.example.cookercorner.exceptions.InvalidJsonException;
@@ -23,7 +24,7 @@ import org.example.cookercorner.services.RecipeService;
 import org.example.cookercorner.services.UserService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
+@Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserServiceImpl implements UserService {
 
@@ -82,7 +84,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> searchUser(String query) {
+    public List<UserSearchDto> searchUser(String query) {
         List<User> users = userRepository.searchUsers(query);
         return userMapper.toListUser(users);
     }
@@ -97,6 +99,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
+    @Transactional
     public String updateProfile(String profileDto, MultipartFile image, Authentication authentication) throws FileUploadException {
         checkAuthentication(authentication);
         User user = getUserFromAuthentication(authentication);
@@ -105,6 +108,15 @@ public class UserServiceImpl implements UserService {
         updateUserInfo(user, request, image);
         userRepository.save(user);
         return "User profile successfully updated";
+    }
+
+    @Override
+    public UserProfileDto getUserProfileById(Long userId, Authentication authentication) {
+        checkAuthentication(authentication);
+        User currentUser = getUser(jwtTokenUtils.getUserIdFromAuthentication(authentication));
+        User user = getUser(userId);
+        boolean isFollowing = userRepository.isUserFollowing(currentUser.getId(), userId);
+        return userMapper.toUserProfileDto(user, recipeService.getUserRecipeQuantity(user), isFollowing);
     }
 
     private void validateImage(MultipartFile image) {
