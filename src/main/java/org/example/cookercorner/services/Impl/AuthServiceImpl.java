@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthServiceImpl implements AuthService {
-
     UserService userService;
     PasswordEncoder passwordEncoder;
     UserRepository userRepository;
