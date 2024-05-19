@@ -16,7 +16,7 @@ spring:
           security: debug
       sql: debug
   profiles:
-    active: dev
+    active: prod
   server:
     port: 8080
   sql:
