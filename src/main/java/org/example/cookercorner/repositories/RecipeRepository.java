@@ -21,7 +21,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     List<Recipe> findRecipesByCreatedBy(User createdBy);
 
     @Query("SELECT r FROM Recipe r JOIN r.saves s WHERE s = :userId")
-    List<Recipe> findMySavedRecipes(Long id);
+    List<Recipe> findMySavedRecipes(@Param("userId") Long userId);
 
     List<Recipe> findRecipesByRecipeNameContainingIgnoreCase(String query);
 

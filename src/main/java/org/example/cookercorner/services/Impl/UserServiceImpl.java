@@ -22,6 +22,7 @@ import org.example.cookercorner.repositories.UserRepository;
 import org.example.cookercorner.services.ImageService;
 import org.example.cookercorner.services.RecipeService;
 import org.example.cookercorner.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Optional;
 
-@AllArgsConstructor
+
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserServiceImpl implements UserService {
@@ -42,6 +43,20 @@ public class UserServiceImpl implements UserService {
     ObjectMapper objectMapper;
     JsonValidator jsonValidator;
     ImageService imageService;
+
+    @Autowired
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper,
+                           JwtTokenUtils jwtTokenUtils, RecipeService recipeService,
+                           ObjectMapper objectMapper, JsonValidator jsonValidator,
+                           ImageService imageService) {
+        this.userRepository = userRepository;
+        this.userMapper = userMapper;
+        this.jwtTokenUtils = jwtTokenUtils;
+        this.recipeService = recipeService;
+        this.objectMapper = objectMapper;
+        this.jsonValidator = jsonValidator;
+        this.imageService = imageService;
+    }
 
     @Override
     public Optional<User> findUserByEmail(String email) {

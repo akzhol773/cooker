@@ -22,6 +22,7 @@ import org.example.cookercorner.repositories.RecipeRepository;
 import org.example.cookercorner.services.ImageService;
 import org.example.cookercorner.services.RecipeService;
 import org.example.cookercorner.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -34,7 +35,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RecipeServiceImpl implements RecipeService {
 
@@ -45,6 +45,17 @@ public class RecipeServiceImpl implements RecipeService {
     JwtTokenUtils jwtTokenUtils;
     ObjectMapper objectMapper;
     JsonValidator jsonValidator;
+
+    @Autowired
+    public RecipeServiceImpl(RecipeRepository recipeRepository, UserService userService, RecipeMapper recipeMapper, ImageService imageService, JwtTokenUtils jwtTokenUtils, ObjectMapper objectMapper, JsonValidator jsonValidator) {
+        this.recipeRepository = recipeRepository;
+        this.userService = userService;
+        this.recipeMapper = recipeMapper;
+        this.imageService = imageService;
+        this.jwtTokenUtils = jwtTokenUtils;
+        this.objectMapper = objectMapper;
+        this.jsonValidator = jsonValidator;
+    }
 
 
     @Override

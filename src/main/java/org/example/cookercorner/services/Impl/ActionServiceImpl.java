@@ -10,17 +10,24 @@ import org.example.cookercorner.exceptions.NotAuthorizedException;
 import org.example.cookercorner.services.ActionService;
 import org.example.cookercorner.services.RecipeService;
 import org.example.cookercorner.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
-@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ActionServiceImpl implements ActionService {
     JwtTokenUtils jwtTokenUtils;
     RecipeService recipeService;
     UserService userService;
+
+    @Autowired
+    public ActionServiceImpl(JwtTokenUtils jwtTokenUtils, RecipeService recipeService, UserService userService) {
+        this.jwtTokenUtils = jwtTokenUtils;
+        this.recipeService = recipeService;
+        this.userService = userService;
+    }
 
     @Override
     public String toggleLike(Authentication authentication, Long recipeId) {

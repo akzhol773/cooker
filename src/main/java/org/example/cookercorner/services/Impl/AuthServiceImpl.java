@@ -13,6 +13,7 @@ import org.example.cookercorner.mapper.UserMapper;
 import org.example.cookercorner.repositories.UserRepository;
 import org.example.cookercorner.services.AuthService;
 import org.example.cookercorner.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,7 +22,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 @Service
-@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthServiceImpl implements AuthService {
 
@@ -31,6 +31,16 @@ public class AuthServiceImpl implements AuthService {
     AuthenticationManager authenticationManager;
     JwtTokenUtils jwtTokenUtils;
     UserMapper userMapper;
+
+    @Autowired
+    public AuthServiceImpl(UserService userService, PasswordEncoder passwordEncoder, UserRepository userRepository, AuthenticationManager authenticationManager, JwtTokenUtils jwtTokenUtils, UserMapper userMapper) {
+        this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+        this.userRepository = userRepository;
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenUtils = jwtTokenUtils;
+        this.userMapper = userMapper;
+    }
 
     @Override
     @Transactional
