@@ -59,6 +59,9 @@ public class ActionServiceImpl implements ActionService {
     public String toggleFollow(Authentication authentication, Long userId) {
         checkAuthentication(authentication);
        Long currentUserId = getUserIdByAuthentication(authentication);
+       if(currentUserId == userId){
+           return "User can not follow yourself!";
+       }
         if (userService.isFollowed(userId, currentUserId)) {
              userService.unfollowUser(userId, currentUserId);
             return "Unfollowed successfully";
