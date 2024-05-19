@@ -5,14 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.example.cookercorner.component.JsonValidator;
 import org.example.cookercorner.component.JwtTokenUtils;
 import org.example.cookercorner.dtos.MyProfileDto;
 import org.example.cookercorner.dtos.UserDto;
 import org.example.cookercorner.dtos.UserUpdateProfileDto;
 import org.example.cookercorner.entities.User;
+import org.example.cookercorner.exceptions.InvalidJsonException;
 import org.example.cookercorner.exceptions.NotAuthorizedException;
 import org.example.cookercorner.exceptions.UserNotFoundException;
 import org.example.cookercorner.mapper.UserMapper;
@@ -20,15 +21,12 @@ import org.example.cookercorner.repositories.UserRepository;
 import org.example.cookercorner.services.ImageService;
 import org.example.cookercorner.services.RecipeService;
 import org.example.cookercorner.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,16 +54,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean isFollowed(Long userId, Long currentUserId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
-        User currentUser = userRepository.findById(currentUserId).orElseThrow(() -> new UserNotFoundException("User not found"));
+        User user =  getUser(userId);
+        User currentUser = getUser(currentUserId);
         return userRepository.isFollowedByUser(user.getId(), currentUser.getId());
     }
+
+
 
     @Override
     @Transactional
     public void unfollowUser(Long userId, Long currentUserId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
-        User currentUser = userRepository.findById(currentUserId).orElseThrow(() -> new UserNotFoundException("User not found"));
+        User user = getUser(userId);
+        User currentUser =getUser(currentUserId);
        userRepository.unfollowUser(currentUser.getId(), user.getId());
        userRepository.removeFollower(user.getId(), currentUser.getId());
 
@@ -74,8 +74,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void followUser(Long userId, Long currentUserId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
-        User currentUser = userRepository.findById(currentUserId).orElseThrow(() -> new UserNotFoundException("User not found"));
+        User user = getUser(userId);
+        User currentUser = getUser(currentUserId);
         userRepository.followUser(currentUser.getId(), user.getId());
         userRepository.addFollower(user.getId(), currentUser.getId());
 
@@ -89,40 +89,64 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public MyProfileDto getMyProfile(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new NotAuthorizedException("Authentication required!");
-        }
-        Long currentUserId = jwtTokenUtils.getUserIdFromAuthentication(authentication);
-        User user = userRepository.findById(currentUserId).orElseThrow(()-> new UsernameNotFoundException("User not found"));
-        String photoUrl = (user.getPhoto() != null) ? user.getPhoto() : "https://t4.ftcdn.net/jpg/03/32/59/65/240_F_332596535_lAdLhf6KzbW6PWXBWeIFTovTii1drkbT.jpg";
-        return userMapper.toMyProfileDto(user, photoUrl, recipeService.getUserRecipeQuantity(user));
+        checkAuthentication(authentication);
+        User user = getUserFromAuthentication(authentication);
+        return userMapper.toMyProfileDto(user, recipeService.getUserRecipeQuantity(user));
     }
 
-    @Override
-    public String updateProfile(String profileDto, MultipartFile image, Authentication authentication) {
 
-            if (authentication == null || !authentication.isAuthenticated()) {
-                throw new NotAuthorizedException("Authentication required!");
-            }
-            User user = userRepository.findById(jwtTokenUtils.getUserIdFromAuthentication(authentication)).orElseThrow(()->
-                new UserNotFoundException("User not found"));
+
+    @Override
+    public String updateProfile(String profileDto, MultipartFile image, Authentication authentication) throws FileUploadException {
+        checkAuthentication(authentication);
+        User user = getUserFromAuthentication(authentication);
+        UserUpdateProfileDto request = parseAndValidateProfileDto(profileDto);
+        validateImage(image);
+        updateUserInfo(user, request, image);
+        userRepository.save(user);
+        return "User profile successfully updated";
+    }
+
+    private void validateImage(MultipartFile image) {
+        if (image != null && !imageService.isImageFile(image)) {
+            throw new BadCredentialsException("The file is not an image");
+        }
+    }
+
+    private void updateUserInfo(User user, UserUpdateProfileDto request, MultipartFile image) throws FileUploadException {
+        user.setName(request.name());
+        user.setBiography(request.biography());
+        if (image != null) {
             try {
+                user.setPhoto(imageService.saveImage(image));
+            } catch (IOException e) {
+                throw new FileUploadException("Failed to upload image", e);
+            }
+        }
+    }
+
+
+    private UserUpdateProfileDto parseAndValidateProfileDto(String profileDto) {
+        try {
             UserUpdateProfileDto request = objectMapper.readValue(profileDto, UserUpdateProfileDto.class);
             jsonValidator.validateUserRequest(request);
-            if (image!=null && !imageService.isImageFile(image)) {
-               throw new BadCredentialsException("The file is not an image");
-            }
-            user.setName(request.name());
-            user.setBiography(request.biography());
-            if(image!=null){
-                user.setPhoto(imageService.saveImage(image));
-            }
-            userRepository.save(user);
-            return "User profile successfully updated";
+            return request;
         } catch (JsonProcessingException e) {
+            throw new InvalidJsonException("Invalid JSON format: " + e.getMessage());
+        }
+    }
 
-        }  catch (Exception e) {
+    private User getUserFromAuthentication(Authentication authentication) {
+        return userRepository.findById(jwtTokenUtils.getUserIdFromAuthentication(authentication)).orElseThrow(()-> new UserNotFoundException("User not found"));
+    }
 
+    private User getUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
+    }
+
+    private void checkAuthentication(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new NotAuthorizedException("Authentication required!");
         }
     }
 }

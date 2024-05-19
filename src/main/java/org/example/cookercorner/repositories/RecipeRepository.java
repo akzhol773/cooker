@@ -56,6 +56,17 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 
     @Query("SELECT COUNT(r) FROM Recipe r WHERE r.createdBy = :user")
     int getUserRecipeQuantity(@Param("user") User user);
+
+
+    @Query("SELECT CASE WHEN COUNT(l) > 0 THEN true ELSE false END " +
+            "FROM Recipe r JOIN r.likes l " +
+            "WHERE r.id = :recipeId AND l = :userId")
+    boolean isRecipeLikedByUser(@Param("recipeId") Long recipeId, @Param("userId") Long userId);
+
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END " +
+            "FROM Recipe r JOIN r.saves s " +
+            "WHERE r.id = :recipeId AND s = :userId")
+    boolean isRecipeSavedByUser(@Param("recipeId") Long recipeId, @Param("userId") Long userId);
 }
 
 

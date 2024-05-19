@@ -1,5 +1,6 @@
 package org.example.cookercorner.services;
 
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.example.cookercorner.dtos.MyProfileDto;
 import org.example.cookercorner.dtos.UserDto;
 import org.example.cookercorner.entities.User;
@@ -26,5 +27,5 @@ public interface UserService {
 
     MyProfileDto getMyProfile(Authentication authentication);
 
-    String updateProfile(String profileDto, MultipartFile image, Authentication authentication);
+    String updateProfile(String profileDto, MultipartFile image, Authentication authentication) throws FileUploadException;
 }

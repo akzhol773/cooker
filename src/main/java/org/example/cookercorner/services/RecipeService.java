@@ -26,7 +26,7 @@ public interface RecipeService {
 
   
 
-    List<RecipeListDto> searchRecipes(String query, Long userId);
+    List<RecipeListDto> searchRecipes(String query, Authentication authentication);
 
     boolean isLiked(Long recipeId, Long currentUserId);
 

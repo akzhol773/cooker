@@ -10,26 +10,21 @@ import org.example.cookercorner.enums.Difficulty;
 import org.example.cookercorner.exceptions.RecipeNotFoundException;
 import org.example.cookercorner.repositories.RecipeRepository;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class RecipeMapper {
-    private final RecipeRepository recipeRepository;
-    public RecipeMapper(RecipeRepository recipeRepository) {
-        this.recipeRepository = recipeRepository;
-    }
+
     public RecipeListDto toRecipeListDto(Recipe recipe, boolean isLikedByUser, boolean isSavedByUser) {
         return new RecipeListDto(
                 recipe.getId(),
-                getImageUrl(recipe),
+                recipe.getPhoto(),
                 recipe.getRecipeName(),
-                getCreatorName(recipe),
-                getLikesCount(recipe),
-                getSavesCount(recipe),
+                recipe.getCreatedBy().getName(),
+                recipe.getLikes().size(),
+                recipe.getSaves().size(),
                 isSavedByUser,
                 isLikedByUser
         );
@@ -41,39 +36,22 @@ public class RecipeMapper {
                         isSaved(recipe.getId(), userId)))
                 .collect(Collectors.toList());
     }
-    public RecipeDto toRecipeDto(Recipe recipe, Long userId) {
+    public RecipeDto toRecipeDto(Recipe recipe, Long userId, boolean isLiked, boolean isSaved) {
         return new RecipeDto(
                 recipe.getId(),
                 recipe.getRecipeName(),
-                getImageUrl(recipe),
-                getCreatorName(recipe),
+                recipe.getPhoto(),
+                recipe.getCreatedBy().getName(),
                 recipe.getCookingTime(),
-                getDifficulty(recipe),
-                getLikesCount(recipe),
-                isLiked(recipe.getId(), userId),
-                isSaved(recipe.getId(), userId),
+                recipe.getDifficulty().toString(),
+                recipe.getLikes().size(),
+                isLiked,
+                isSaved,
                 recipe.getDescription(),
                 mapIngredients(recipe.getIngredients())
         );
     }
-    private String getImageUrl(Recipe recipe) {
-        return (recipe.getPhoto() != null) ? recipe.getImage().getUrl() : null;
-    }
 
-    private String getCreatorName(Recipe recipe) {
-        return (recipe.getCreatedBy() != null) ? recipe.getCreatedBy().getName() : "Unknown";
-    }
-    private int getLikesCount(Recipe recipe) {
-        return recipe.getLikes().size();
-    }
-
-    private int getSavesCount(Recipe recipe) {
-        return recipe.getSaves().size();
-    }
-
-    private String getDifficulty(Recipe recipe) {
-        return (recipe.getDifficulty() != null) ? recipe.getDifficulty().name() : "Unknown";
-    }
 
     private List<IngredientDto> mapIngredients(List<Ingredient> ingredients) {
         return ingredients.stream()
@@ -81,16 +59,6 @@ public class RecipeMapper {
                 .collect(Collectors.toList());
     }
 
-    private boolean isLiked(Long recipeId, Long userId) {
-        Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(()-> new RecipeNotFoundException("Recipe not found"));
-        return recipe != null && recipe.getLikes().stream().anyMatch(user -> user.getId().equals(userId));
-    }
-
-
-    private boolean isSaved(Long recipeId, Long userId) {
-        Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(()-> new RecipeNotFoundException("Recipe not found"));
-        return recipe != null && recipe.getSaves().stream().anyMatch(user -> user.getId().equals(userId));
-    }
 
 
     public Recipe toEntity(RecipeRequestDto requestDto, String photo, User user) {

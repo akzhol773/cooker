@@ -133,10 +133,6 @@ public class RecipeController {
     )
     @GetMapping("/search-recipe")
     public ResponseEntity<List<RecipeListDto>> search(@RequestParam(name = "query")String query, Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
-        }
-        Long userId = jwtTokenUtils.getUserIdFromAuthentication(authentication);
-        return ResponseEntity.ok(recipeService.searchRecipes(query, userId));
+        return ResponseEntity.ok().body(recipeService.searchRecipes(query, authentication));
     }
 }

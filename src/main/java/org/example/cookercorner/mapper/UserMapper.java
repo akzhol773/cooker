@@ -41,10 +41,10 @@ public class UserMapper {
     }
 
 
-    public MyProfileDto toMyProfileDto(User user, String photoUrl, int userRecipeQuantity) {
+    public MyProfileDto toMyProfileDto(User user, int userRecipeQuantity) {
 
        return new MyProfileDto(
-                photoUrl,
+               user.getPhoto(),
                 user.getName(),
                 userRecipeQuantity,
                 user.getFollowers().size(),

@@ -41,7 +41,6 @@ public class AuthServiceImpl implements AuthService {
             throw new EmailAlreadyExistException("Email already exist. Please, try to use another one.");
         }
 
-
         if (!registrationUserDto.password().equals(registrationUserDto.confirmPassword())) {
             throw new PasswordNotMatchException("Passwords do not match.");
         }

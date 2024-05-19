@@ -61,6 +61,7 @@ public class RecipeServiceImpl implements RecipeService {
     public List<RecipeListDto> getMyRecipe(Authentication authentication) {
         checkAuthentication(authentication);
        User user = getUserByAuthentication(authentication);
+       Recipe recipe =
         return recipeMapper.toRecipeListDtoList(recipeRepository.findRecipesByCreatedBy(user), user.getId());
     }
 
@@ -74,14 +75,19 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public RecipeDto getRecipeById(Long recipeId, Authentication authentication) {
         checkAuthentication(authentication);
-        return recipeMapper.toRecipeDto(getRecipe(recipeId), jwtTokenUtils.getUserIdFromAuthentication(authentication));
+        User user = getUser(jwtTokenUtils.getUserIdFromAuthentication(authentication));
+        boolean isSaved = recipeRepository.isRecipeSavedByUser(recipeId, user.getId());
+        boolean isLiked = recipeRepository.isRecipeLikedByUser(recipeId, user.getId());
+        return recipeMapper.toRecipeDto(getRecipe(recipeId), user.getId(), isLiked, isSaved);
     }
 
 
+
     @Override
-    public List<RecipeListDto> searchRecipes(String recipe, Long currentUserId) {
+    public List<RecipeListDto> searchRecipes(String recipe, Authentication authentication) {
+        checkAuthentication(authentication);
         List<Recipe> recipes = recipeRepository.findRecipesByRecipeNameContainingIgnoreCase(recipe);
-        return recipeMapper.toRecipeListDtoList(recipes, currentUserId);
+        return recipeMapper.toRecipeListDtoList(recipes, getUser(jwtTokenUtils.getUserIdFromAuthentication(authentication)).getId());
     }
 
     @Override
