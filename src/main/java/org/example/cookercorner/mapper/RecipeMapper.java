@@ -29,13 +29,7 @@ public class RecipeMapper {
                 isLikedByUser
         );
     }
-    public List<RecipeListDto> toRecipeListDtoList(List<Recipe> recipes, Long userId) {
-        return recipes.stream()
-                .map(recipe -> toRecipeListDto(recipe,
-                        isLiked(recipe.getId(), userId),
-                        isSaved(recipe.getId(), userId)))
-                .collect(Collectors.toList());
-    }
+
     public RecipeDto toRecipeDto(Recipe recipe, Long userId, boolean isLiked, boolean isSaved) {
         return new RecipeDto(
                 recipe.getId(),
@@ -84,5 +78,9 @@ public class RecipeMapper {
                 .collect(Collectors.toList());
         recipe.setIngredients(ingredients);
         return recipe;
+    }
+
+    public List<RecipeSearchDto> toRecipeSearchListDto(List<Recipe> recipes) {
+        return recipes.stream().map(recipe -> new RecipeSearchDto(recipe.getId(), recipe.getPhoto(), recipe.getRecipeName())).collect(Collectors.toList());
     }
 }

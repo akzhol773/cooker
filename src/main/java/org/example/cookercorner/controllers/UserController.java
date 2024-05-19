@@ -1,24 +1,19 @@
 package org.example.cookercorner.controllers;
 
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.example.cookercorner.dtos.MyProfileDto;
 import org.example.cookercorner.dtos.UserDto;
 import org.example.cookercorner.services.UserService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -27,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("api/users/")
 public class UserController {
+
     UserService userService;
 
     @Operation(
@@ -69,8 +65,7 @@ public class UserController {
     @PutMapping("/update_profile")
     public ResponseEntity<String> changeProfile(@RequestPart("dto") String profileDto,
                                                 @RequestPart(value = "image", required = false) MultipartFile image,
-                                                Authentication authentication) {
-
+                                                Authentication authentication) throws FileUploadException {
        return ResponseEntity.ok(userService.updateProfile(profileDto, image, authentication));
     }
 

@@ -16,6 +16,7 @@ import org.example.cookercorner.component.JwtTokenUtils;
 import org.example.cookercorner.dtos.RecipeDto;
 import org.example.cookercorner.dtos.RecipeListDto;
 import org.example.cookercorner.dtos.RecipeRequestDto;
+import org.example.cookercorner.dtos.RecipeSearchDto;
 import org.example.cookercorner.enums.Category;
 import org.example.cookercorner.services.ImageService;
 import org.example.cookercorner.services.RecipeService;
@@ -34,11 +35,8 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RecipeController {
 
-    JwtTokenUtils jwtTokenUtils;
     RecipeService recipeService;
-    ObjectMapper objectMapper;
-    JsonValidator jsonValidator;
-    ImageService imageService;
+
     @Operation(
             summary = "Get recipes by category",
             description = "Using this endpoint it is possible to get recipes by category",
@@ -132,7 +130,7 @@ public class RecipeController {
             }
     )
     @GetMapping("/search-recipe")
-    public ResponseEntity<List<RecipeListDto>> search(@RequestParam(name = "query")String query, Authentication authentication) {
+    public ResponseEntity<List<RecipeSearchDto>> search(@RequestParam(name = "query")String query, Authentication authentication) {
         return ResponseEntity.ok().body(recipeService.searchRecipes(query, authentication));
     }
 }

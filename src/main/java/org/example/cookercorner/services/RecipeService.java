@@ -4,6 +4,7 @@ import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.example.cookercorner.dtos.RecipeDto;
 import org.example.cookercorner.dtos.RecipeListDto;
 import org.example.cookercorner.dtos.RecipeRequestDto;
+import org.example.cookercorner.dtos.RecipeSearchDto;
 import org.example.cookercorner.entities.Recipe;
 import org.example.cookercorner.entities.User;
 import org.example.cookercorner.enums.Category;
@@ -26,7 +27,7 @@ public interface RecipeService {
 
   
 
-    List<RecipeListDto> searchRecipes(String query, Authentication authentication);
+    List<RecipeSearchDto> searchRecipes(String query, Authentication authentication);
 
     boolean isLiked(Long recipeId, Long currentUserId);
 

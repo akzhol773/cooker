@@ -8,10 +8,7 @@ import lombok.experimental.FieldDefaults;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.example.cookercorner.component.JsonValidator;
 import org.example.cookercorner.component.JwtTokenUtils;
-import org.example.cookercorner.dtos.IngredientRequestDto;
-import org.example.cookercorner.dtos.RecipeDto;
-import org.example.cookercorner.dtos.RecipeListDto;
-import org.example.cookercorner.dtos.RecipeRequestDto;
+import org.example.cookercorner.dtos.*;
 import org.example.cookercorner.entities.Ingredient;
 import org.example.cookercorner.entities.Recipe;
 import org.example.cookercorner.entities.User;
@@ -41,6 +38,7 @@ import java.rmi.ServerException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @RequiredArgsConstructor
@@ -61,15 +59,29 @@ public class RecipeServiceImpl implements RecipeService {
     public List<RecipeListDto> getMyRecipe(Authentication authentication) {
         checkAuthentication(authentication);
        User user = getUserByAuthentication(authentication);
-       Recipe recipe =
-        return recipeMapper.toRecipeListDtoList(recipeRepository.findRecipesByCreatedBy(user), user.getId());
+       List<Recipe> recipes = recipeRepository.findRecipesByCreatedBy(user);
+        return recipes.stream()
+                .map(recipe -> {
+                    boolean isLikedByUser = recipeRepository.isLikedByUser(recipe.getId(), user.getId());
+                    boolean isSavedByUser = recipeRepository.isSavedByUser(recipe.getId(), user.getId());
+                    return recipeMapper.toRecipeListDto(recipe, isLikedByUser, isSavedByUser);
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<RecipeListDto> getMySavedRecipe(Authentication authentication) {
         checkAuthentication(authentication);
         User user = getUserByAuthentication(authentication);
-       return recipeMapper.toRecipeListDtoList(recipeRepository.findMySavedRecipes(user.getId()), user.getId());
+
+        List<Recipe> recipes = recipeRepository.findMySavedRecipes(user.getId());
+        return recipes.stream()
+                .map(recipe -> {
+                    boolean isLikedByUser = recipeRepository.isLikedByUser(recipe.getId(), user.getId());
+                    boolean isSavedByUser = recipeRepository.isSavedByUser(recipe.getId(), user.getId());
+                    return recipeMapper.toRecipeListDto(recipe, isLikedByUser, isSavedByUser);
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -84,10 +96,10 @@ public class RecipeServiceImpl implements RecipeService {
 
 
     @Override
-    public List<RecipeListDto> searchRecipes(String recipe, Authentication authentication) {
+    public List<RecipeSearchDto> searchRecipes(String recipe, Authentication authentication) {
         checkAuthentication(authentication);
         List<Recipe> recipes = recipeRepository.findRecipesByRecipeNameContainingIgnoreCase(recipe);
-        return recipeMapper.toRecipeListDtoList(recipes, getUser(jwtTokenUtils.getUserIdFromAuthentication(authentication)).getId());
+        return recipeMapper.toRecipeSearchListDto(recipes);
     }
 
     @Override
