@@ -5,10 +5,12 @@ import org.example.cookercorner.dtos.UserDto;
 import org.example.cookercorner.entities.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
-
+@Service
 public interface UserService {
     Optional<User> findUserByEmail(String email);
 
@@ -23,4 +25,6 @@ public interface UserService {
     List<UserDto> searchUser(String query);
 
     MyProfileDto getMyProfile(Authentication authentication);
+
+    String updateProfile(String profileDto, MultipartFile image, Authentication authentication);
 }

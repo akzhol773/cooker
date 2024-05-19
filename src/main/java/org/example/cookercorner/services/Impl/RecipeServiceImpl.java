@@ -69,6 +69,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public void addRecipe(RecipeRequestDto requestDto, MultipartFile image, Long userId) {
+
         Recipe recipe = new Recipe();
         recipe.setRecipeName(requestDto.recipeName());
         recipe.setCategory(Category.valueOf(requestDto.category().toUpperCase()));
@@ -87,7 +88,8 @@ public class RecipeServiceImpl implements RecipeService {
             ingredients.add(ingredient1);
         }
         recipe.setIngredients(ingredients);
-        return recipeRepository.save(recipe);
+        recipeRepository.save(recipe);
+
     }
 
     @Override

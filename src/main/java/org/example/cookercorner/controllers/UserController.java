@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.cookercorner.dtos.MyProfileDto;
 import org.example.cookercorner.dtos.UserDto;
@@ -23,7 +24,7 @@ import java.util.List;
 
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("api/users/")
 public class UserController {
     UserService userService;
@@ -69,30 +70,8 @@ public class UserController {
     public ResponseEntity<String> changeProfile(@RequestPart("dto") String profileDto,
                                                 @RequestPart(value = "image", required = false) MultipartFile image,
                                                 Authentication authentication) {
-        try {
-            if (authentication == null || !authentication.isAuthenticated()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication required");
-            }
-            UserUpdateProfileDto request = objectMapper.readValue(profileDto, UserUpdateProfileDto.class);
-            jsonValidator.validateUserRequest(request);
 
-            if (image != null && !isImageFile(image)) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The file is not an image");
-            }
-            Long currentUserId = tokenUtils.getUserIdFromAuthentication(authentication);
-            String responseMessage = userService.updateUser(request, currentUserId, image);
-            return ResponseEntity.ok(responseMessage);
-        } catch (JsonProcessingException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid profile DTO JSON: " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update profile: " + e.getMessage());
-        }
+       return ResponseEntity.ok(userService.updateProfile(profileDto, image, authentication));
     }
 
-    private boolean isImageFile(MultipartFile file) {
-        String contentType = file.getContentType();
-        return contentType != null && contentType.startsWith("image/");
-    }
 }

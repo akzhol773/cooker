@@ -1,29 +1,37 @@
 package org.example.cookercorner.services.Impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.example.cookercorner.component.JsonValidator;
 import org.example.cookercorner.component.JwtTokenUtils;
 import org.example.cookercorner.dtos.MyProfileDto;
 import org.example.cookercorner.dtos.UserDto;
+import org.example.cookercorner.dtos.UserUpdateProfileDto;
 import org.example.cookercorner.entities.User;
 import org.example.cookercorner.exceptions.NotAuthorizedException;
 import org.example.cookercorner.exceptions.UserNotFoundException;
 import org.example.cookercorner.mapper.UserMapper;
 import org.example.cookercorner.repositories.UserRepository;
+import org.example.cookercorner.services.ImageService;
 import org.example.cookercorner.services.RecipeService;
 import org.example.cookercorner.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
 
-@Service
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserServiceImpl implements UserService {
@@ -32,6 +40,9 @@ public class UserServiceImpl implements UserService {
     UserMapper userMapper;
     JwtTokenUtils jwtTokenUtils;
     RecipeService recipeService;
+    ObjectMapper objectMapper;
+    JsonValidator jsonValidator;
+    ImageService imageService;
 
     @Override
     public Optional<User> findUserByEmail(String email) {
@@ -86,8 +97,35 @@ public class UserServiceImpl implements UserService {
         String photoUrl = (user.getPhoto() != null) ? user.getPhoto() : "https://t4.ftcdn.net/jpg/03/32/59/65/240_F_332596535_lAdLhf6KzbW6PWXBWeIFTovTii1drkbT.jpg";
         return userMapper.toMyProfileDto(user, photoUrl, recipeService.getUserRecipeQuantity(user));
     }
-}
 
+    @Override
+    public String updateProfile(String profileDto, MultipartFile image, Authentication authentication) {
+
+            if (authentication == null || !authentication.isAuthenticated()) {
+                throw new NotAuthorizedException("Authentication required!");
+            }
+            User user = userRepository.findById(jwtTokenUtils.getUserIdFromAuthentication(authentication)).orElseThrow(()->
+                new UserNotFoundException("User not found"));
+            try {
+            UserUpdateProfileDto request = objectMapper.readValue(profileDto, UserUpdateProfileDto.class);
+            jsonValidator.validateUserRequest(request);
+            if (image!=null && !imageService.isImageFile(image)) {
+               throw new BadCredentialsException("The file is not an image");
+            }
+            user.setName(request.name());
+            user.setBiography(request.biography());
+            if(image!=null){
+                user.setPhoto(imageService.saveImage(image));
+            }
+            userRepository.save(user);
+            return "User profile successfully updated";
+        } catch (JsonProcessingException e) {
+
+        }  catch (Exception e) {
+
+        }
+    }
+}
 
 
 

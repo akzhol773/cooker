@@ -1,6 +1,7 @@
 package org.example.cookercorner.mapper;
 
 
+import org.example.cookercorner.dtos.IngredientDto;
 import org.example.cookercorner.dtos.RecipeDto;
 import org.example.cookercorner.dtos.RecipeListDto;
 import org.example.cookercorner.entities.Ingredient;
