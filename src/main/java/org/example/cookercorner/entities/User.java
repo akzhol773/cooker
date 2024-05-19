@@ -37,7 +37,7 @@ public class User implements UserDetails {
 
     String biography;
 
-    String photo;
+    String photoUrl;
 
     @ElementCollection
     List<Long> followings = new ArrayList<>();

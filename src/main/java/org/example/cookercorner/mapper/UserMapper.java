@@ -8,7 +8,6 @@ import org.example.cookercorner.entities.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,14 +25,14 @@ public class UserMapper {
     public List<UserSearchDto> toListUser(List<User> users) {
         return users.stream().map(user ->
                 new UserSearchDto(user.getId(), user.getUsername(),
-                        user.getPhoto())).collect(Collectors.toList());
+                        user.getPhotoUrl())).collect(Collectors.toList());
     }
 
 
     public MyProfileDto toMyProfileDto(User user, int userRecipeQuantity) {
 
        return new MyProfileDto(
-               user.getPhoto(),
+               user.getPhotoUrl(),
                 user.getName(),
                 userRecipeQuantity,
                 user.getFollowers().size(),
@@ -45,7 +44,7 @@ public class UserMapper {
     public UserProfileDto toUserProfileDto(User user, int recipeQuantity, boolean isFollowing) {
        return new UserProfileDto(
                user.getId(),
-               user.getPhoto(),
+               user.getPhotoUrl(),
                user.getUsername(),
                recipeQuantity,
                user.getFollowers().size(),

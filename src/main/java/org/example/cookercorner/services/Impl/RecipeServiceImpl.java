@@ -10,35 +10,27 @@ import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.example.cookercorner.component.JsonValidator;
 import org.example.cookercorner.component.JwtTokenUtils;
 import org.example.cookercorner.dtos.*;
-import org.example.cookercorner.entities.Ingredient;
 import org.example.cookercorner.entities.Recipe;
 import org.example.cookercorner.entities.User;
 import org.example.cookercorner.enums.Category;
-import org.example.cookercorner.enums.Difficulty;
 import org.example.cookercorner.exceptions.InvalidFileException;
 import org.example.cookercorner.exceptions.InvalidJsonException;
 import org.example.cookercorner.exceptions.RecipeNotFoundException;
 import org.example.cookercorner.exceptions.UserNotFoundException;
 import org.example.cookercorner.mapper.RecipeMapper;
 import org.example.cookercorner.repositories.RecipeRepository;
-import org.example.cookercorner.repositories.UserRepository;
 import org.example.cookercorner.services.ImageService;
 import org.example.cookercorner.services.RecipeService;
 import org.example.cookercorner.services.UserService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.server.ServerErrorException;
 
 import java.io.IOException;
-import java.rmi.ServerException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -158,9 +150,9 @@ public class RecipeServiceImpl implements RecipeService {
         User user = getUserFromAuthentication(authentication);
 
         validateImage(image);
-        String imagePath = saveImage(image);
+        String imageUrl = saveImage(image);
 
-        Recipe recipe = recipeMapper.toEntity(requestDto, imagePath, user);
+        Recipe recipe = recipeMapper.toEntity(requestDto, imageUrl, user);
         recipeRepository.save(recipe);
 
         return "The recipe has been added successfully!";
@@ -187,12 +179,8 @@ public class RecipeServiceImpl implements RecipeService {
         }
     }
 
-    private String saveImage(MultipartFile image) throws FileUploadException {
-        try {
-            return imageService.saveImage(image);
-        } catch (IOException e) {
-            throw new FileUploadException("Failed to upload image", e);
-        }
+    private String saveImage(MultipartFile image){
+        return imageService.uploadFile(image, "recipe_photos");
     }
 
     private User getUserByAuthentication(Authentication authentication) {

@@ -49,7 +49,7 @@ public class Recipe {
     @JoinColumn(name = "user_id")
     User createdBy;
 
-    String photo;
+    String photoUrl;
 
     @CreationTimestamp
     Date createdDate;

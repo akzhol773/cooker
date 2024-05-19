@@ -27,7 +27,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -125,15 +124,11 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void updateUserInfo(User user, UserUpdateProfileDto request, MultipartFile image) throws FileUploadException {
+    private void updateUserInfo(User user, UserUpdateProfileDto request, MultipartFile image){
         user.setName(request.name());
         user.setBiography(request.biography());
         if (image != null) {
-            try {
-                user.setPhoto(imageService.saveImage(image));
-            } catch (IOException e) {
-                throw new FileUploadException("Failed to upload image", e);
-            }
+            user.setPhotoUrl(imageService.uploadFile(image, "user_photos"));
         }
     }
 

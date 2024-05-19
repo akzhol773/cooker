@@ -18,7 +18,7 @@ public class RecipeMapper {
     public RecipeListDto toRecipeListDto(Recipe recipe, boolean isLikedByUser, boolean isSavedByUser) {
         return new RecipeListDto(
                 recipe.getId(),
-                recipe.getPhoto(),
+                recipe.getPhotoUrl(),
                 recipe.getRecipeName(),
                 recipe.getCreatedBy().getName(),
                 recipe.getLikes().size(),
@@ -32,7 +32,7 @@ public class RecipeMapper {
         return new RecipeDto(
                 recipe.getId(),
                 recipe.getRecipeName(),
-                recipe.getPhoto(),
+                recipe.getPhotoUrl(),
                 recipe.getCreatedBy().getName(),
                 recipe.getCookingTime(),
                 recipe.getDifficulty().toString(),
@@ -61,7 +61,7 @@ public class RecipeMapper {
         recipe.setCategory(Category.valueOf(category));
         recipe.setDifficulty(Difficulty.valueOf(difficulty));
         recipe.setDescription(requestDto.description());
-        recipe.setPhoto(photo);
+        recipe.setPhotoUrl(photo);
         recipe.setCookingTime(requestDto.cookingTime());
         recipe.setCreatedBy(user);
         List<Ingredient> ingredients = requestDto.ingredients().stream()
@@ -79,6 +79,6 @@ public class RecipeMapper {
     }
 
     public List<RecipeSearchDto> toRecipeSearchListDto(List<Recipe> recipes) {
-        return recipes.stream().map(recipe -> new RecipeSearchDto(recipe.getId(), recipe.getPhoto(), recipe.getRecipeName())).collect(Collectors.toList());
+        return recipes.stream().map(recipe -> new RecipeSearchDto(recipe.getId(), recipe.getPhotoUrl(), recipe.getRecipeName())).collect(Collectors.toList());
     }
 }
