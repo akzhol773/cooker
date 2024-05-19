@@ -2,9 +2,7 @@ package org.example.cookercorner.entities;
 
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.example.cookercorner.enums.Category;
 import org.example.cookercorner.enums.Difficulty;

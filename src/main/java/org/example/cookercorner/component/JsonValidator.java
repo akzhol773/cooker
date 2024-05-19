@@ -1,5 +1,7 @@
 package org.example.cookercorner.component;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.cookercorner.dtos.RecipeRequestDto;
 import org.example.cookercorner.dtos.UserUpdateProfileDto;
 import org.springframework.stereotype.Component;
@@ -8,8 +10,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Validator;
 
 @Component
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JsonValidator {
-    private final Validator validator;
+    Validator validator;
 
     public JsonValidator(Validator validator) {
         this.validator = validator;

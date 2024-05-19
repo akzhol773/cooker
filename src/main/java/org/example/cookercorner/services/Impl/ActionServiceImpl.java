@@ -20,28 +20,24 @@ public class ActionServiceImpl implements ActionService {
     JwtTokenUtils jwtTokenUtils;
     RecipeService recipeService;
     UserService userService;
+
     @Override
     public String toggleLike(Authentication authentication, Long recipeId) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new NotAuthorizedException("Authentication required!");
-        }
-        Long currentUserId = jwtTokenUtils.getUserIdFromAuthentication(authentication);
-
+        checkAuthentication(authentication);
+        Long currentUserId = getUserIdByAuthentication(authentication);
         if (recipeService.isLiked(recipeId, currentUserId)) {
             recipeService.removeLikeFromRecipe(recipeId, currentUserId);
             return "Like removed successfully";
         }
             recipeService.putLikeIntoRecipe(recipeId, currentUserId);
             return "Like added successfully";
-
     }
+
 
     @Override
     public String toggleSave(Authentication authentication, Long recipeId) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new NotAuthorizedException("Authentication required!");
-        }
-        Long currentUserId = jwtTokenUtils.getUserIdFromAuthentication(authentication);
+        checkAuthentication(authentication);
+        Long currentUserId = getUserIdByAuthentication(authentication);
         if (recipeService.isSaved(recipeId, currentUserId)) {
             recipeService.removeSaveFromRecipe(recipeId, currentUserId);
             return "Recipe unsaved successfully!";
@@ -52,10 +48,8 @@ public class ActionServiceImpl implements ActionService {
 
     @Override
     public String toggleFollow(Authentication authentication, Long userId) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new NotAuthorizedException("Authentication required!");
-        }
-       Long currentUserId = jwtTokenUtils.getUserIdFromAuthentication(authentication);
+        checkAuthentication(authentication);
+       Long currentUserId = getUserIdByAuthentication(authentication);
         if (userService.isFollowed(userId, currentUserId)) {
              userService.unfollowUser(userId, currentUserId);
             return "Unfollowed successfully";
@@ -64,6 +58,14 @@ public class ActionServiceImpl implements ActionService {
             return "Followed successfully";
     }
 
+    private static void checkAuthentication(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new NotAuthorizedException("Authentication required!");
+        }
+    }
+    private Long getUserIdByAuthentication(Authentication authentication) {
+        return jwtTokenUtils.getUserIdFromAuthentication(authentication);
+    }
 
 }
 

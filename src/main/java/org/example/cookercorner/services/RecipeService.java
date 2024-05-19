@@ -1,5 +1,6 @@
 package org.example.cookercorner.services;
 
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.example.cookercorner.dtos.RecipeDto;
 import org.example.cookercorner.dtos.RecipeListDto;
 import org.example.cookercorner.dtos.RecipeRequestDto;
@@ -7,28 +8,28 @@ import org.example.cookercorner.entities.Recipe;
 import org.example.cookercorner.entities.User;
 import org.example.cookercorner.enums.Category;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface RecipeService {
-    List<RecipeListDto> getByCategory(Category categoryEnum, Long userId);
+    
 
-    List<RecipeListDto> getMyRecipe(Long userId);
+    List<RecipeListDto> getMyRecipe(Authentication authentication);
 
-    List<RecipeListDto> getMySavedRecipe(Long userId);
+    List<RecipeListDto> getMySavedRecipe(Authentication authentication);
 
 
-    RecipeDto getRecipeById(Long recipeId, Long userId);
+    RecipeDto getRecipeById(Long recipeId, Authentication authentication);
 
-    void addRecipe(RecipeRequestDto requestDto, MultipartFile image, Long userId);
+  
 
     List<RecipeListDto> searchRecipes(String query, Long userId);
 
     boolean isLiked(Long recipeId, Long currentUserId);
 
-    Optional<Recipe> findRecipeById(Long recipeId);
 
     void removeLikeFromRecipe(Long recipeId, Long currentUserId);
 
@@ -41,4 +42,8 @@ public interface RecipeService {
     void putSaveIntoRecipe(Long recipeId, Long currentUserId);
 
     int getUserRecipeQuantity(User user);
+
+    List<RecipeListDto> getByCategory(Authentication authentication, String category);
+
+    String addRecipe(String recipeDto, MultipartFile image, Authentication authentication) throws FileUploadException;
 }

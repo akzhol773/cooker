@@ -1,15 +1,18 @@
 package org.example.cookercorner.mapper;
 
 
-import org.example.cookercorner.dtos.IngredientDto;
-import org.example.cookercorner.dtos.RecipeDto;
-import org.example.cookercorner.dtos.RecipeListDto;
+import org.example.cookercorner.dtos.*;
 import org.example.cookercorner.entities.Ingredient;
 import org.example.cookercorner.entities.Recipe;
+import org.example.cookercorner.entities.User;
+import org.example.cookercorner.enums.Category;
+import org.example.cookercorner.enums.Difficulty;
 import org.example.cookercorner.exceptions.RecipeNotFoundException;
 import org.example.cookercorner.repositories.RecipeRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -87,5 +90,31 @@ public class RecipeMapper {
     private boolean isSaved(Long recipeId, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(()-> new RecipeNotFoundException("Recipe not found"));
         return recipe != null && recipe.getSaves().stream().anyMatch(user -> user.getId().equals(userId));
+    }
+
+
+    public Recipe toEntity(RecipeRequestDto requestDto, String photo, User user) {
+        String category = requestDto.category().toUpperCase();
+        String difficulty = requestDto.difficulty().toUpperCase();
+        Recipe recipe = new Recipe();
+        recipe.setRecipeName(requestDto.recipeName());
+        recipe.setCategory(Category.valueOf(category));
+        recipe.setDifficulty(Difficulty.valueOf(difficulty));
+        recipe.setDescription(requestDto.description());
+        recipe.setPhoto(photo);
+        recipe.setCookingTime(requestDto.cookingTime());
+        recipe.setCreatedBy(user);
+        List<Ingredient> ingredients = requestDto.ingredients().stream()
+                .map(ingredientDto -> {
+                    Ingredient ingredient = new Ingredient();
+                    ingredient.setRecipe(recipe);
+                    ingredient.setName(ingredientDto.name());
+                    ingredient.setUnitOfMeasurement(ingredientDto.unitOfMeasurement());
+                    ingredient.setAmount(ingredientDto.amount());
+                    return ingredient;
+                })
+                .collect(Collectors.toList());
+        recipe.setIngredients(ingredients);
+        return recipe;
     }
 }

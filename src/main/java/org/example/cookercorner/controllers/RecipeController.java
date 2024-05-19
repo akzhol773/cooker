@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.example.cookercorner.component.JsonValidator;
 import org.example.cookercorner.component.JwtTokenUtils;
 import org.example.cookercorner.dtos.RecipeDto;
@@ -50,18 +51,7 @@ public class RecipeController {
     @GetMapping("/get-by-category")
     public ResponseEntity<List<RecipeListDto>> getRecipes(@RequestParam(value = "category") String category,
                                                           Authentication authentication) {
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
-        }
-        Long userId = jwtTokenUtils.getUserIdFromAuthentication(authentication);
-        String upperCaseCategory = category.toUpperCase();
-        try {
-            Category categoryEnum = Category.valueOf(upperCaseCategory);
-            return ResponseEntity.ok(recipeService.getByCategory(categoryEnum, userId));
-        } catch (IllegalArgumentException exception) {
-            throw new IllegalArgumentException(exception.getMessage());
-        }
+       return ResponseEntity.ok(recipeService.getByCategory(authentication, category));
     }
 
 
@@ -76,11 +66,7 @@ public class RecipeController {
     )
     @GetMapping("/my-recipes")
     public ResponseEntity<List<RecipeListDto>> getMyRecipes(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
-        }
-        Long userId = jwtTokenUtils.getUserIdFromAuthentication(authentication);
-        return ResponseEntity.ok(recipeService.getMyRecipe(userId));
+        return ResponseEntity.ok(recipeService.getMyRecipe(authentication));
     }
 
 
@@ -96,12 +82,7 @@ public class RecipeController {
 
     @GetMapping("/my-saved-recipes")
     public ResponseEntity<List<RecipeListDto>> getMySavedRecipes(Authentication authentication) {
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
-        }
-        Long userId = jwtTokenUtils.getUserIdFromAuthentication(authentication);
-        return ResponseEntity.ok(recipeService.getMySavedRecipe(userId));
+        return ResponseEntity.ok(recipeService.getMySavedRecipe(authentication));
     }
 
 
@@ -119,11 +100,7 @@ public class RecipeController {
 
     @GetMapping("/get-by-id/{recipeId}")
     public ResponseEntity<RecipeDto> getRecipeById(@PathVariable Long recipeId, Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
-        }
-        Long userId = jwtTokenUtils.getUserIdFromAuthentication(authentication);
-        return ResponseEntity.ok(recipeService.getRecipeById(recipeId, userId));
+       return ResponseEntity.ok(recipeService.getRecipeById(recipeId, authentication));
     }
 
 
@@ -138,26 +115,8 @@ public class RecipeController {
     @PostMapping("/add_recipe")
     public ResponseEntity<String> addRecipe(@RequestPart("recipeDto") String recipeDto,
                                             @RequestPart("photo") MultipartFile image,
-                                            Authentication authentication) {
-        try {
-            if (authentication == null || !authentication.isAuthenticated()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication required");
-            }
-            Long userId = jwtTokenUtils.getUserIdFromAuthentication(authentication);
-            RecipeRequestDto requestDto = objectMapper.readValue(recipeDto, RecipeRequestDto.class);
-            jsonValidator.validateRecipeRequest(requestDto);
-            if (image == null || image.isEmpty() || !imageService.isImageFile(image)) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid image file");
-            }
-            recipeService.addRecipe(requestDto, image, userId);
-            return ResponseEntity.ok("Recipe has been added successfully");
-        } catch (JsonProcessingException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid recipe DTO JSON: " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add recipe: " + e.getMessage());
-        }
+                                            Authentication authentication) throws FileUploadException {
+     return ResponseEntity.ok(recipeService.addRecipe(recipeDto, image, authentication));
     }
 
 
