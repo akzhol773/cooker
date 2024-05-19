@@ -1,6 +1,5 @@
 package org.example.cookercorner.repositories;
 
-import org.example.cookercorner.dtos.RecipeListDto;
 import org.example.cookercorner.entities.Recipe;
 import org.example.cookercorner.entities.User;
 import org.example.cookercorner.enums.Category;
@@ -16,7 +15,7 @@ import java.util.List;
 @Repository
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     @Query("select r from Recipe r where r.category = :category ORDER BY SIZE(r.likes) DESC limit 10")
-    List<RecipeListDto> findByCategory(@Param("category") Category category);
+    List<Recipe> findByCategory(@Param("category") Category category);
 
     List<Recipe> findRecipesByCreatedBy(User createdBy);
 
@@ -30,12 +29,12 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM Recipe r WHERE r.id = :recipeId AND :user MEMBER OF r.likes")
-    void removeLikeFromRecipe(@Param("recipeId") Long recipeId, @Param("user") User user);
+    @Query(value = "DELETE FROM recipe_likes WHERE recipe_id = :recipeId AND likes = :userId", nativeQuery = true)
+    void removeLikeFromRecipe(@Param("recipeId") Long recipeId, @Param("userId") Long userId);
 
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO recipe_likes (recipe_id, user_id) VALUES (:recipeId, :userId) ON CONFLICT DO NOTHING", nativeQuery = true)
+    @Query(value = "INSERT INTO recipe_likes (recipe_id, likes) VALUES (:recipeId, :userId) ON CONFLICT DO NOTHING", nativeQuery = true)
     void putLikeIntoRecipe(@Param("recipeId") Long recipeId, @Param("userId") Long userId);
 
     @Query("SELECT CASE WHEN COUNT(rs) > 0 THEN TRUE ELSE FALSE END " +
@@ -45,12 +44,12 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM recipe_saves WHERE recipe_id = :recipeId AND user_id = :userId", nativeQuery = true)
+    @Query(value = "DELETE FROM recipe_saves WHERE recipe_id = :recipeId AND saves = :userId", nativeQuery = true)
     void removeSaveFromRecipe(@Param("recipeId") Long recipeId, @Param("userId") Long userId);
 
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO recipe_saves (recipe_id, user_id) VALUES (:recipeId, :userId) ON CONFLICT DO NOTHING", nativeQuery = true)
+    @Query(value = "INSERT INTO recipe_saves (recipe_id, saves) VALUES (:recipeId, :userId) ON CONFLICT DO NOTHING", nativeQuery = true)
     void saveRecipeForUser(@Param("recipeId") Long recipeId, @Param("userId") Long userId);
 
 

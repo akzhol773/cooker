@@ -23,6 +23,7 @@ import org.example.cookercorner.services.ImageService;
 import org.example.cookercorner.services.RecipeService;
 import org.example.cookercorner.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -63,16 +64,12 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email);
     }
 
-    @Override
-    public Optional<User> findUserById(Long currentUserId) {
-        return userRepository.findById(currentUserId);
-    }
 
     @Override
     public boolean isFollowed(Long userId, Long currentUserId) {
         User user =  getUser(userId);
         User currentUser = getUser(currentUserId);
-        return userRepository.isFollowedByUser(user.getId(), currentUser.getId());
+        return userRepository.isUserFollowing(currentUser.getId(), user.getId());
     }
 
 
@@ -98,8 +95,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserSearchDto> searchUser(String query) {
-        List<User> users = userRepository.searchUsers(query);
+    public List<UserSearchDto> searchUser(String username) {
+        List<User> users = userRepository.findUsersByNameContainingIgnoreCase(username);
         return userMapper.toListUser(users);
     }
 

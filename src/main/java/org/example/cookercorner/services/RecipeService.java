@@ -23,25 +23,10 @@ public interface RecipeService {
 
     List<RecipeListDto> getMySavedRecipe(Authentication authentication);
 
-
     RecipeDto getRecipeById(Long recipeId, Authentication authentication);
-
-  
 
     List<RecipeSearchDto> searchRecipes(String query, Authentication authentication);
 
-    boolean isLiked(Long recipeId, Long currentUserId);
-
-
-    void removeLikeFromRecipe(Long recipeId, Long currentUserId);
-
-    void putLikeIntoRecipe(Long recipeId, Long currentUserId);
-
-    boolean isSaved(Long recipeId, Long currentUserId);
-
-    void removeSaveFromRecipe(Long recipeId, Long currentUserId);
-
-    void putSaveIntoRecipe(Long recipeId, Long currentUserId);
 
     int getUserRecipeQuantity(User user);
 

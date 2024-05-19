@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/actions")
 public class ActionController {
 
-    private final ActionService actionService;
+    ActionService actionService;
 
     @PutMapping("/like/{recipeId}")
     @Operation(summary = "Toggle like for a recipe")

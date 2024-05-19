@@ -18,13 +18,14 @@ public class UserMapper {
         user.setEmail(dto.email());
         user.setName(dto.name());
         user.setRole("ROLE_USER");
+        user.setPhotoUrl("https://t4.ftcdn.net/jpg/03/32/59/65/240_F_332596535_lAdLhf6KzbW6PWXBWeIFTovTii1drkbT.jpg");
         user.setPassword(passwordEncoder.encode(dto.password()));
         return user;
     }
 
     public List<UserSearchDto> toListUser(List<User> users) {
         return users.stream().map(user ->
-                new UserSearchDto(user.getId(), user.getUsername(),
+                new UserSearchDto(user.getId(), user.getName(),
                         user.getPhotoUrl())).collect(Collectors.toList());
     }
 
@@ -32,6 +33,7 @@ public class UserMapper {
     public MyProfileDto toMyProfileDto(User user, int userRecipeQuantity) {
 
        return new MyProfileDto(
+               user.getId(),
                user.getPhotoUrl(),
                 user.getName(),
                 userRecipeQuantity,
@@ -45,7 +47,7 @@ public class UserMapper {
        return new UserProfileDto(
                user.getId(),
                user.getPhotoUrl(),
-               user.getUsername(),
+               user.getName(),
                recipeQuantity,
                user.getFollowers().size(),
                user.getFollowings().size(),

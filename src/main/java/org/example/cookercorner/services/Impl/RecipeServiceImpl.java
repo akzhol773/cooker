@@ -19,6 +19,7 @@ import org.example.cookercorner.exceptions.RecipeNotFoundException;
 import org.example.cookercorner.exceptions.UserNotFoundException;
 import org.example.cookercorner.mapper.RecipeMapper;
 import org.example.cookercorner.repositories.RecipeRepository;
+import org.example.cookercorner.repositories.UserRepository;
 import org.example.cookercorner.services.ImageService;
 import org.example.cookercorner.services.RecipeService;
 import org.example.cookercorner.services.UserService;
@@ -37,9 +38,8 @@ import java.util.stream.Collectors;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RecipeServiceImpl implements RecipeService {
-
     RecipeRepository recipeRepository;
-    UserService userService;
+    UserRepository userRepository;
     RecipeMapper recipeMapper;
     ImageService imageService;
     JwtTokenUtils jwtTokenUtils;
@@ -47,9 +47,9 @@ public class RecipeServiceImpl implements RecipeService {
     JsonValidator jsonValidator;
 
     @Autowired
-    public RecipeServiceImpl(RecipeRepository recipeRepository, UserService userService, RecipeMapper recipeMapper, ImageService imageService, JwtTokenUtils jwtTokenUtils, ObjectMapper objectMapper, JsonValidator jsonValidator) {
+    public RecipeServiceImpl(RecipeRepository recipeRepository, UserRepository userRepository, RecipeMapper recipeMapper, ImageService imageService, JwtTokenUtils jwtTokenUtils, ObjectMapper objectMapper, JsonValidator jsonValidator) {
         this.recipeRepository = recipeRepository;
-        this.userService = userService;
+        this.userRepository = userRepository;
         this.recipeMapper = recipeMapper;
         this.imageService = imageService;
         this.jwtTokenUtils = jwtTokenUtils;
@@ -65,12 +65,13 @@ public class RecipeServiceImpl implements RecipeService {
        List<Recipe> recipes = recipeRepository.findRecipesByCreatedBy(user);
         return recipes.stream()
                 .map(recipe -> {
-                    boolean isLikedByUser = recipeRepository.isLikedByUser(recipe.getId(), user.getId());
-                    boolean isSavedByUser = recipeRepository.isSavedByUser(recipe.getId(), user.getId());
+                    boolean isLikedByUser = isLikedByUser(recipe.getId(), user.getId());
+                    boolean isSavedByUser = isSavedByUser(recipe.getId(), user.getId());
                     return recipeMapper.toRecipeListDto(recipe, isLikedByUser, isSavedByUser);
                 })
                 .collect(Collectors.toList());
     }
+
 
     @Override
     public List<RecipeListDto> getMySavedRecipe(Authentication authentication) {
@@ -106,42 +107,6 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public boolean isLiked(Long recipeId, Long currentUserId) {
-        return recipeRepository.isLikedByUser(recipeId, currentUserId);
-    }
-
-
-    @Override
-    @Transactional
-    public void removeLikeFromRecipe(Long recipeId, Long currentUserId) {
-        recipeRepository.removeLikeFromRecipe(getRecipe(recipeId).getId(), getUser(currentUserId));
-    }
-
-    @Override
-    @Transactional
-    public void putLikeIntoRecipe(Long recipeId, Long currentUserId) {
-        recipeRepository.putLikeIntoRecipe(getRecipe(recipeId).getId(), getUser(currentUserId).getId());
-    }
-
-    @Override
-    public boolean isSaved(Long recipeId, Long currentUserId) {
-        return recipeRepository.isSavedByUser(getRecipe(recipeId).getId(), getUser(currentUserId).getId());
-    }
-
-
-    @Override
-    @Transactional
-    public void removeSaveFromRecipe(Long recipeId, Long currentUserId) {
-        recipeRepository.removeSaveFromRecipe(getRecipe(recipeId).getId(), getUser(currentUserId).getId());
-    }
-
-    @Override
-    @Transactional
-    public void putSaveIntoRecipe(Long recipeId, Long currentUserId) {
-        recipeRepository.saveRecipeForUser(getRecipe(recipeId).getId(), getUser(currentUserId).getId());
-    }
-
-    @Override
     public int getUserRecipeQuantity(User user) {
         return recipeRepository.getUserRecipeQuantity(user);
     }
@@ -149,12 +114,16 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public List<RecipeListDto> getByCategory(Authentication authentication, String category) {
        checkAuthentication(authentication);
-        return recipeRepository.findByCategory(Category.valueOf(category.toUpperCase()));
+       Long currentUserId = jwtTokenUtils.getUserIdFromAuthentication(authentication);
+        List<Recipe> recipes = recipeRepository.findByCategory(Category.valueOf(category.toUpperCase()));
+        return recipes.stream().map(recipe -> recipeMapper.toRecipeListDto(recipe,
+                isLikedByUser(recipe.getId(), currentUserId),
+                isSavedByUser(recipe.getId(), currentUserId))).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public String addRecipe(String recipeDto, MultipartFile image, Authentication authentication) throws FileUploadException {
+    public String addRecipe(String recipeDto, MultipartFile image, Authentication authentication){
         checkAuthentication(authentication);
 
         RecipeRequestDto requestDto = parseAndValidateRecipeDto(recipeDto);
@@ -177,7 +146,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     private User getUserFromAuthentication(Authentication authentication) {
         Long userId = jwtTokenUtils.getUserIdFromAuthentication(authentication);
-        return userService.findUserById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
+        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
     }
 
     private RecipeRequestDto parseAndValidateRecipeDto(String recipeDto) {
@@ -195,7 +164,7 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     private User getUserByAuthentication(Authentication authentication) {
-        return userService.findUserById(jwtTokenUtils.getUserIdFromAuthentication(authentication)).orElseThrow(() ->
+        return userRepository.findById(jwtTokenUtils.getUserIdFromAuthentication(authentication)).orElseThrow(() ->
                 new UserNotFoundException("User not found"));
     }
 
@@ -211,8 +180,16 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     private User getUser(Long currentUserId) {
-        return userService.findUserById(currentUserId)
+        return userRepository.findById(currentUserId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    private boolean isSavedByUser(Long recipeId, Long userId) {
+        return recipeRepository.isSavedByUser(recipeId, userId);
+    }
+
+    private boolean isLikedByUser(Long recipeId, Long userId) {
+        return recipeRepository.isLikedByUser(recipeId, userId);
     }
 
 }

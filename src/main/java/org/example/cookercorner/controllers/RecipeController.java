@@ -110,7 +110,7 @@ public class RecipeController {
                     @ApiResponse(responseCode = "403", description = "Authentication required")
             }
     )
-    @PostMapping("/add_recipe")
+    @PostMapping("/add-recipe")
     public ResponseEntity<String> addRecipe(@RequestPart("recipeDto") String recipeDto,
                                             @RequestPart("photo") MultipartFile image,
                                             Authentication authentication) throws FileUploadException {

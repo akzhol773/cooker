@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.cookercorner.component.JwtTokenUtils;
 import org.example.cookercorner.exceptions.NotAuthorizedException;
+import org.example.cookercorner.repositories.RecipeRepository;
 import org.example.cookercorner.services.ActionService;
 import org.example.cookercorner.services.RecipeService;
 import org.example.cookercorner.services.UserService;
@@ -19,13 +20,13 @@ import org.springframework.stereotype.Service;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ActionServiceImpl implements ActionService {
     JwtTokenUtils jwtTokenUtils;
-    RecipeService recipeService;
+    RecipeRepository recipeRepository;
     UserService userService;
 
     @Autowired
-    public ActionServiceImpl(JwtTokenUtils jwtTokenUtils, RecipeService recipeService, UserService userService) {
+    public ActionServiceImpl(JwtTokenUtils jwtTokenUtils, RecipeRepository recipeRepository, UserService userService) {
         this.jwtTokenUtils = jwtTokenUtils;
-        this.recipeService = recipeService;
+        this.recipeRepository = recipeRepository;
         this.userService = userService;
     }
 
@@ -33,11 +34,11 @@ public class ActionServiceImpl implements ActionService {
     public String toggleLike(Authentication authentication, Long recipeId) {
         checkAuthentication(authentication);
         Long currentUserId = getUserIdByAuthentication(authentication);
-        if (recipeService.isLiked(recipeId, currentUserId)) {
-            recipeService.removeLikeFromRecipe(recipeId, currentUserId);
+        if (isLiked(recipeId, currentUserId)) {
+            removeLikeFromRecipe(recipeId, currentUserId);
             return "Like removed successfully";
         }
-            recipeService.putLikeIntoRecipe(recipeId, currentUserId);
+            putLikeIntoRecipe(recipeId, currentUserId);
             return "Like added successfully";
     }
 
@@ -46,11 +47,11 @@ public class ActionServiceImpl implements ActionService {
     public String toggleSave(Authentication authentication, Long recipeId) {
         checkAuthentication(authentication);
         Long currentUserId = getUserIdByAuthentication(authentication);
-        if (recipeService.isSaved(recipeId, currentUserId)) {
-            recipeService.removeSaveFromRecipe(recipeId, currentUserId);
+        if (isSaved(recipeId, currentUserId)) {
+            removeSaveFromRecipe(recipeId, currentUserId);
             return "Recipe unsaved successfully!";
         }
-            recipeService.putSaveIntoRecipe(recipeId, currentUserId);
+            putSaveIntoRecipe(recipeId, currentUserId);
             return "Recipe saved successfully!";
     }
 
@@ -74,6 +75,35 @@ public class ActionServiceImpl implements ActionService {
     private Long getUserIdByAuthentication(Authentication authentication) {
         return jwtTokenUtils.getUserIdFromAuthentication(authentication);
     }
+
+    private boolean isSaved(Long recipeId, Long currentUserId) {
+        return recipeRepository.isSavedByUser(recipeId, currentUserId);
+    }
+
+
+    private boolean isLiked(Long recipeId, Long currentUserId) {
+        return recipeRepository.isLikedByUser(recipeId, currentUserId);
+    }
+
+
+    private void removeLikeFromRecipe(Long recipeId, Long currentUserId) {
+        recipeRepository.removeLikeFromRecipe(recipeId, currentUserId);
+    }
+
+    private void putLikeIntoRecipe(Long recipeId, Long currentUserId) {
+        recipeRepository.putLikeIntoRecipe(recipeId, currentUserId);
+    }
+
+    private void removeSaveFromRecipe(Long recipeId, Long currentUserId) {
+        recipeRepository.removeSaveFromRecipe(recipeId, currentUserId);
+    }
+
+    private void putSaveIntoRecipe(Long recipeId, Long currentUserId) {
+        recipeRepository.saveRecipeForUser(recipeId, currentUserId);
+    }
+
+
+
 
 }
 
