@@ -1,31 +1,21 @@
 package org.example.cookercorner.controllers;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
-import org.example.cookercorner.component.JsonValidator;
-import org.example.cookercorner.component.JwtTokenUtils;
 import org.example.cookercorner.dtos.RecipeDto;
 import org.example.cookercorner.dtos.RecipeListDto;
-import org.example.cookercorner.dtos.RecipeRequestDto;
 import org.example.cookercorner.dtos.RecipeSearchDto;
-import org.example.cookercorner.enums.Category;
-import org.example.cookercorner.services.ImageService;
 import org.example.cookercorner.services.RecipeService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 

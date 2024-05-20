@@ -4,9 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.example.cookercorner.component.JsonValidator;
 import org.example.cookercorner.component.JwtTokenUtils;
 import org.example.cookercorner.dtos.*;
@@ -22,7 +20,6 @@ import org.example.cookercorner.repositories.RecipeRepository;
 import org.example.cookercorner.repositories.UserRepository;
 import org.example.cookercorner.services.ImageService;
 import org.example.cookercorner.services.RecipeService;
-import org.example.cookercorner.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -31,7 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
