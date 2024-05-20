@@ -2,29 +2,29 @@ package org.example.cookercorner.services.Impl;
 
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.cookercorner.component.JwtTokenUtils;
 import org.example.cookercorner.dtos.*;
 import org.example.cookercorner.entities.User;
 import org.example.cookercorner.exceptions.EmailAlreadyExistException;
+import org.example.cookercorner.exceptions.InvalidTokenException;
 import org.example.cookercorner.exceptions.PasswordNotMatchException;
+import org.example.cookercorner.exceptions.UserNotFoundException;
 import org.example.cookercorner.mapper.UserMapper;
 import org.example.cookercorner.repositories.UserRepository;
 import org.example.cookercorner.services.AuthService;
-import org.example.cookercorner.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthServiceImpl implements AuthService {
-    UserService userService;
     PasswordEncoder passwordEncoder;
     UserRepository userRepository;
     AuthenticationManager authenticationManager;
@@ -32,8 +32,7 @@ public class AuthServiceImpl implements AuthService {
     UserMapper userMapper;
 
     @Autowired
-    public AuthServiceImpl(UserService userService, PasswordEncoder passwordEncoder, UserRepository userRepository, AuthenticationManager authenticationManager, JwtTokenUtils jwtTokenUtils, UserMapper userMapper) {
-        this.userService = userService;
+    public AuthServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository, AuthenticationManager authenticationManager, JwtTokenUtils jwtTokenUtils, UserMapper userMapper) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
@@ -44,11 +43,9 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public String createNewUser(UserRequestDto registrationUserDto) {
-
-        if (userService.findUserByEmail(registrationUserDto.email()).isPresent()) {
+        if (userRepository.findByEmail(registrationUserDto.email()).isPresent()) {
             throw new EmailAlreadyExistException("Email already exist. Please, try to use another one.");
         }
-
         if (!registrationUserDto.password().equals(registrationUserDto.confirmPassword())) {
             throw new PasswordNotMatchException("Passwords do not match.");
         }
@@ -57,15 +54,45 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public JwtResponseDto authenticate(JwtRequestDto authRequest) {
 
         try {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.email(), authRequest.password()));
+
             User user = (User) authentication.getPrincipal();
-            return new JwtResponseDto(authRequest.email(),
-                    jwtTokenUtils.generateAccessToken(user));
+            String accessToken = jwtTokenUtils.generateAccessToken(user);
+            String refreshToken = jwtTokenUtils.generateRefreshToken(user);
+
+            return new JwtResponseDto(user.getEmail(), accessToken, refreshToken);
         } catch (AuthenticationException exception) {
-                throw new BadCredentialsException("Invalid username or password");
+            if (exception instanceof BadCredentialsException) {
+                throw new BadCredentialsException("Invalid email or password");
+            } else {
+                throw new DisabledException("User is not enabled yet");
+            }
+        }
+    }
+
+
+    @Override
+    public JwtRefreshTokenDto refreshToken(String refreshToken) {
+        try {
+            if (refreshToken == null) {
+                throw new InvalidTokenException("Token can not be null!");
+            }
+
+            String usernameFromRefreshToken = jwtTokenUtils.getEmailFromRefreshToken(refreshToken);
+            if (usernameFromRefreshToken == null) {
+                throw new UsernameNotFoundException("Username not found!");
+            }
+            User user = userRepository.findByEmail(usernameFromRefreshToken).orElseThrow(() ->
+                    new UserNotFoundException("User not found"));
+            String accessToken = jwtTokenUtils.generateAccessToken(user);
+            return new JwtRefreshTokenDto(usernameFromRefreshToken, accessToken);
+
+        } catch (Exception e) {
+            throw new InvalidTokenException("Token is invalid!");
         }
     }
 }

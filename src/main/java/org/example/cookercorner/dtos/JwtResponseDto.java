@@ -4,5 +4,5 @@ package org.example.cookercorner.dtos;
 import lombok.Builder;
 
 @Builder
-public record JwtResponseDto(String username, String accessToken){
+public record JwtResponseDto(String username, String accessToken, String refreshToken){
 }

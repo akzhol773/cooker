@@ -64,6 +64,23 @@ public class AuthController {
         return  ResponseEntity.ok().body(authService.createNewUser(registrationUserDto));
     }
 
+    @Operation(
+            summary = "Refresh the token",
+            description = "If the token is expired then it is possible to generate a new access token using refresh token"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successfully returned a new access token"),
+            @ApiResponse(responseCode = "403", description = "Token has expired"),
+            @ApiResponse(responseCode = "403", description = "Token not found"),
+
+    })
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<JwtRefreshTokenDto> refreshToken(@RequestParam("refreshToken") String refreshToken){
+        return  ResponseEntity.ok(authService.refreshToken(refreshToken));
+
+    }
+
 
 
 }

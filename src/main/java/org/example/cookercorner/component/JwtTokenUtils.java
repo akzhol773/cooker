@@ -1,19 +1,16 @@
 package org.example.cookercorner.component;
 
 
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.example.cookercorner.entities.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -26,20 +23,27 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JwtTokenUtils {
-    static String accessSecretKey;
-    static int tokenExpirationTime;
+    @Value("${jwt.accessSecretKey}")
+    private  String accessSecretKey;
 
-    public JwtTokenUtils(@Value("${jwt.secret}") String accessSecretKey, @Value("${token-expiration-time}") int tokenExpirationTime) {
-        this.accessSecretKey = accessSecretKey;
-        this.tokenExpirationTime = tokenExpirationTime;
-    }
+    @Value("${jwt.refreshSecretKey}")
+    private  String refreshSecretKey;
 
-    private static SecretKey getAccessKey() {
+    @Value("${jwt.access-token-expiration-time}")
+    private int accessTokenExpirationTime;
+
+    @Value("${jwt.refresh-token-expiration-time}")
+    private int refreshTokenExpirationTime;
+
+
+    private  SecretKey getAccessKey() {
         return Keys.hmacShaKeyFor(accessSecretKey.getBytes(StandardCharsets.UTF_8));
     }
 
+    private  SecretKey getRefreshKey() {
+        return Keys.hmacShaKeyFor(refreshSecretKey.getBytes(StandardCharsets.UTF_8));
+    }
 
     public String generateAccessToken(User user) {
         Map<String, Object> claims = new HashMap<>();
@@ -50,10 +54,19 @@ public class JwtTokenUtils {
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(user.getUsername())
+                .setSubject(user.getEmail())
                 .setIssuedAt(new Date(Instant.now().toEpochMilli()))
-                .setExpiration(new Date(Instant.now().plus(tokenExpirationTime, ChronoUnit.MINUTES).toEpochMilli()))
+                .setExpiration(new Date(Instant.now().plus(accessTokenExpirationTime, ChronoUnit.MINUTES).toEpochMilli()))
                 .signWith(getAccessKey())
+                .compact();
+    }
+
+    public String generateRefreshToken(User user) {
+        return Jwts.builder()
+                .setSubject(user.getEmail())
+                .setIssuedAt(new Date(Instant.now().toEpochMilli()))
+                .setExpiration(new Date(Instant.now().plus(refreshTokenExpirationTime, ChronoUnit.DAYS).toEpochMilli()))
+                .signWith(getRefreshKey())
                 .compact();
     }
 
@@ -70,11 +83,21 @@ public class JwtTokenUtils {
         return null;
     }
 
-    public String getUsername(String token) {
+
+
+    public String getEmail(String token) {
         return  Jwts.parser()
                 .verifyWith(getAccessKey())
                 .build()
                 .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
+    }
+    public String getEmailFromRefreshToken(String refreshToken) {
+        return Jwts.parser()
+                .verifyWith(getRefreshKey())
+                .build()
+                .parseSignedClaims(refreshToken)
                 .getPayload()
                 .getSubject();
     }
@@ -87,6 +110,7 @@ public class JwtTokenUtils {
                 .getBody();
 
     }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = getAllClaimsFromToken(token);
         return claimsResolver.apply(claims);
@@ -98,8 +122,9 @@ public class JwtTokenUtils {
         return extractExpiration(token).before(new Date());
     }
 
+
     public Boolean validateToken(String token, UserDetails user) {
-        final String username = getUsername(token);
+        final String username = getEmail(token);
         return (username.equals(user.getUsername()) && !isTokenExpired(token));
     }
 }
