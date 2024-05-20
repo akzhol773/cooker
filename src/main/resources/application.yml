@@ -28,8 +28,10 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 jwt:
-  secret: "716f6f496e21776646527c5d7e2d4d4c205b382f6c392c267e512e2349"
-token-expiration-time: 15
+  accessSecretKey: "716f6f496e21776646527c5d7e2d4d4c205b382f6c392c267e512e2349"
+  refreshSecretKey: "716f6f496e21776646531c5d7e2d4d4c206b382f6c392c267e512e2349"
+access-token-expiration-time: 15
+refresh-token-expiration-time: 10
 cloudinary:
   cloudName: "drbxd4tkj"
   apiKey: "621377172471399"

@@ -103,6 +103,18 @@ public class GlobalExceptionHandler {
     }
 
 
+    @ExceptionHandler(InvalidTokenException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> handleInvalidTokenException(
+            InvalidTokenException ex) {
+        UUID exceptionUUID = UUID.randomUUID();
+        log.error("Exception UUID: {}", exceptionUUID, ex);
+        ExceptionDto exceptionDto = new ExceptionDto(LocalDateTime.now().toString(), ex.getMessage());
+        return new ResponseEntity<>(exceptionDto, HttpStatus.BAD_REQUEST);
+    }
+
+
+
 
 
 

@@ -9,6 +9,5 @@ import org.springframework.stereotype.Service;
 public interface AuthService {
     String createNewUser(UserRequestDto registrationUserDto);
     JwtResponseDto authenticate(JwtRequestDto authRequest);
-
-
+    JwtRefreshTokenDto refreshToken(String refreshToken);
 }

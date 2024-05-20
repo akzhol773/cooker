@@ -28,17 +28,31 @@ import java.util.stream.Collectors;
 @Component
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JwtTokenUtils {
-    static String accessSecretKey;
-    static int tokenExpirationTime;
 
-    public JwtTokenUtils(@Value("${jwt.secret}") String accessSecretKey, @Value("${token-expiration-time}") int tokenExpirationTime) {
-        this.accessSecretKey = accessSecretKey;
-        this.tokenExpirationTime = tokenExpirationTime;
-    }
+    @Value("${jwt.accessSecretKey}")
+    static String accessSecretKey;
+
+    @Value("${jwt.refreshSecretKey}")
+    static String refreshSecretKey;
+
+    @Value("${access-token-expiration-time}")
+    static int accessTokenExpirationTime;
+
+    @Value("${refresh-token-expiration-time}")
+    static int refreshTokenExpirationTime;
+
+
+
+
 
     private static SecretKey getAccessKey() {
         return Keys.hmacShaKeyFor(accessSecretKey.getBytes(StandardCharsets.UTF_8));
     }
+
+    private static SecretKey getRefreshKey() {
+        return Keys.hmacShaKeyFor(refreshSecretKey.getBytes(StandardCharsets.UTF_8));
+    }
+
 
 
     public String generateAccessToken(User user) {
@@ -52,7 +66,7 @@ public class JwtTokenUtils {
                 .setClaims(claims)
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date(Instant.now().toEpochMilli()))
-                .setExpiration(new Date(Instant.now().plus(tokenExpirationTime, ChronoUnit.MINUTES).toEpochMilli()))
+                .setExpiration(new Date(Instant.now().plus(accessTokenExpirationTime, ChronoUnit.MINUTES).toEpochMilli()))
                 .signWith(getAccessKey())
                 .compact();
     }
@@ -87,6 +101,16 @@ public class JwtTokenUtils {
                 .getBody();
 
     }
+
+    public String getEmailFromRefreshToken(String refreshToken) {
+        return Jwts.parser()
+                .verifyWith(getRefreshKey())
+                .build()
+                .parseSignedClaims(refreshToken)
+                .getPayload()
+                .getSubject();
+    }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = getAllClaimsFromToken(token);
         return claimsResolver.apply(claims);
@@ -101,5 +125,14 @@ public class JwtTokenUtils {
     public Boolean validateToken(String token, UserDetails user) {
         final String username = getUsername(token);
         return (username.equals(user.getUsername()) && !isTokenExpired(token));
+    }
+
+    public String generateRefreshToken(User user) {
+        return Jwts.builder()
+                .setSubject(user.getEmail())
+                .setIssuedAt(new Date(Instant.now().toEpochMilli()))
+                .setExpiration(new Date(Instant.now().plus(refreshTokenExpirationTime, ChronoUnit.DAYS).toEpochMilli()))
+                .signWith(getRefreshKey())
+                .compact();
     }
 }
