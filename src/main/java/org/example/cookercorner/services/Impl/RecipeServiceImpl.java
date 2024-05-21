@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.cookercorner.component.JsonValidator;
 import org.example.cookercorner.component.JwtTokenUtils;
@@ -11,10 +12,7 @@ import org.example.cookercorner.dtos.*;
 import org.example.cookercorner.entities.Recipe;
 import org.example.cookercorner.entities.User;
 import org.example.cookercorner.enums.Category;
-import org.example.cookercorner.exceptions.InvalidFileException;
-import org.example.cookercorner.exceptions.InvalidJsonException;
-import org.example.cookercorner.exceptions.RecipeNotFoundException;
-import org.example.cookercorner.exceptions.UserNotFoundException;
+import org.example.cookercorner.exceptions.*;
 import org.example.cookercorner.mapper.RecipeMapper;
 import org.example.cookercorner.repositories.RecipeRepository;
 import org.example.cookercorner.repositories.UserRepository;
@@ -32,8 +30,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RecipeServiceImpl implements RecipeService {
+
     RecipeRepository recipeRepository;
     UserRepository userRepository;
     RecipeMapper recipeMapper;
@@ -41,18 +41,6 @@ public class RecipeServiceImpl implements RecipeService {
     JwtTokenUtils jwtTokenUtils;
     ObjectMapper objectMapper;
     JsonValidator jsonValidator;
-
-    @Autowired
-    public RecipeServiceImpl(RecipeRepository recipeRepository, UserRepository userRepository, RecipeMapper recipeMapper, ImageService imageService, JwtTokenUtils jwtTokenUtils, ObjectMapper objectMapper, JsonValidator jsonValidator) {
-        this.recipeRepository = recipeRepository;
-        this.userRepository = userRepository;
-        this.recipeMapper = recipeMapper;
-        this.imageService = imageService;
-        this.jwtTokenUtils = jwtTokenUtils;
-        this.objectMapper = objectMapper;
-        this.jsonValidator = jsonValidator;
-    }
-
 
     @Override
     public List<RecipeListDto> getMyRecipe(Authentication authentication) {
@@ -92,7 +80,6 @@ public class RecipeServiceImpl implements RecipeService {
         boolean isLiked = recipeRepository.isRecipeLikedByUser(recipeId, user.getId());
         return recipeMapper.toRecipeDto(getRecipe(recipeId), isLiked, isSaved);
     }
-
 
 
     @Override
@@ -166,7 +153,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     private static void checkAuthentication(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+            throw new NotAuthorizedException("Authentication required!");
         }
     }
 
@@ -177,7 +164,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     private User getUser(Long currentUserId) {
         return userRepository.findById(currentUserId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
     }
 
     private boolean isSavedByUser(Long recipeId, Long userId) {

@@ -2,6 +2,7 @@ package org.example.cookercorner.services.Impl;
 
 import com.cloudinary.Cloudinary;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.cookercorner.services.ImageService;
@@ -13,15 +14,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ImageServiceImpl implements ImageService {
 
     Cloudinary cloudinary;
-
-    @Autowired
-    public ImageServiceImpl(Cloudinary cloudinary) {
-        this.cloudinary = cloudinary;
-    }
 
     @Override
     public boolean isImageFile(MultipartFile image) {

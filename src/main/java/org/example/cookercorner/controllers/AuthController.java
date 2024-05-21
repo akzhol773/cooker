@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
@@ -26,7 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @RestController
-@RequiredArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("api/auth/")
 public class AuthController {

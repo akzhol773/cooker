@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
 
 @Component
 public class UserMapper {
-    public User toEntity(UserRequestDto dto, PasswordEncoder passwordEncoder) {
+    public User toEntity(UserRequestDto dto, String photo, PasswordEncoder passwordEncoder) {
         User user = new User();
         user.setEmail(dto.email());
         user.setName(dto.name());
         user.setRole("ROLE_USER");
-        user.setPhotoUrl("https://t4.ftcdn.net/jpg/03/32/59/65/240_F_332596535_lAdLhf6KzbW6PWXBWeIFTovTii1drkbT.jpg");
+        user.setPhotoUrl(photo);
         user.setPassword(passwordEncoder.encode(dto.password()));
         return user;
     }

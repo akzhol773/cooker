@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.example.cookercorner.component.JsonValidator;
@@ -32,7 +33,8 @@ import java.util.Optional;
 
 
 @Service
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserServiceImpl implements UserService {
 
     UserRepository userRepository;
@@ -43,19 +45,6 @@ public class UserServiceImpl implements UserService {
     JsonValidator jsonValidator;
     ImageService imageService;
 
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper,
-                           JwtTokenUtils jwtTokenUtils, RecipeService recipeService,
-                           ObjectMapper objectMapper, JsonValidator jsonValidator,
-                           ImageService imageService) {
-        this.userRepository = userRepository;
-        this.userMapper = userMapper;
-        this.jwtTokenUtils = jwtTokenUtils;
-        this.recipeService = recipeService;
-        this.objectMapper = objectMapper;
-        this.jsonValidator = jsonValidator;
-        this.imageService = imageService;
-    }
 
     @Override
     public Optional<User> findUserByEmail(String email) {

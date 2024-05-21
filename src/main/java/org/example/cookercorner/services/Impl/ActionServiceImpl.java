@@ -3,6 +3,7 @@ package org.example.cookercorner.services.Impl;
 
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.cookercorner.component.JwtTokenUtils;
 import org.example.cookercorner.exceptions.NotAuthorizedException;
@@ -14,21 +15,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service
-@Transactional
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ActionServiceImpl implements ActionService {
+
     JwtTokenUtils jwtTokenUtils;
     RecipeRepository recipeRepository;
     UserService userService;
 
-    @Autowired
-    public ActionServiceImpl(JwtTokenUtils jwtTokenUtils, RecipeRepository recipeRepository, UserService userService) {
-        this.jwtTokenUtils = jwtTokenUtils;
-        this.recipeRepository = recipeRepository;
-        this.userService = userService;
-    }
-
     @Override
+    @Transactional
     public String toggleLike(Authentication authentication, Long recipeId) {
         checkAuthentication(authentication);
         Long currentUserId = getUserIdByAuthentication(authentication);
@@ -42,6 +38,7 @@ public class ActionServiceImpl implements ActionService {
 
 
     @Override
+    @Transactional
     public String toggleSave(Authentication authentication, Long recipeId) {
         checkAuthentication(authentication);
         Long currentUserId = getUserIdByAuthentication(authentication);
@@ -54,6 +51,7 @@ public class ActionServiceImpl implements ActionService {
     }
 
     @Override
+    @Transactional
     public String toggleFollow(Authentication authentication, Long userId) {
         checkAuthentication(authentication);
        Long currentUserId = getUserIdByAuthentication(authentication);
@@ -86,7 +84,6 @@ public class ActionServiceImpl implements ActionService {
         return recipeRepository.isLikedByUser(recipeId, currentUserId);
     }
 
-
     private void removeLikeFromRecipe(Long recipeId, Long currentUserId) {
         recipeRepository.removeLikeFromRecipe(recipeId, currentUserId);
     }
@@ -102,8 +99,6 @@ public class ActionServiceImpl implements ActionService {
     private void putSaveIntoRecipe(Long recipeId, Long currentUserId) {
         recipeRepository.saveRecipeForUser(recipeId, currentUserId);
     }
-
-
 
 
 }

@@ -38,6 +38,8 @@ cloudinary:
   apiKey: "621377172471399"
   apiSecret: "2WSu2bvSVzuUFqiE508LLXq5DuQ"
 
+userDefaultPicture: "https://t4.ftcdn.net/jpg/03/32/59/65/240_F_332596535_lAdLhf6KzbW6PWXBWeIFTovTii1drkbT.jpg"
+
 
 
 

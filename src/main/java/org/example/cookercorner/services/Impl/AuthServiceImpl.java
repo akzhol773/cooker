@@ -2,6 +2,7 @@ package org.example.cookercorner.services.Impl;
 
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.cookercorner.component.JwtTokenUtils;
 import org.example.cookercorner.dtos.*;
@@ -14,6 +15,7 @@ import org.example.cookercorner.mapper.UserMapper;
 import org.example.cookercorner.repositories.UserRepository;
 import org.example.cookercorner.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
@@ -23,22 +25,19 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 @Service
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthServiceImpl implements AuthService {
+
     PasswordEncoder passwordEncoder;
     UserRepository userRepository;
     AuthenticationManager authenticationManager;
     JwtTokenUtils jwtTokenUtils;
     UserMapper userMapper;
 
-    @Autowired
-    public AuthServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository, AuthenticationManager authenticationManager, JwtTokenUtils jwtTokenUtils, UserMapper userMapper) {
-        this.passwordEncoder = passwordEncoder;
-        this.userRepository = userRepository;
-        this.authenticationManager = authenticationManager;
-        this.jwtTokenUtils = jwtTokenUtils;
-        this.userMapper = userMapper;
-    }
+
+    @Value("${userDefaultPicture}")
+    private static String userDefaultPicture;
 
     @Override
     @Transactional
@@ -49,12 +48,11 @@ public class AuthServiceImpl implements AuthService {
         if (!registrationUserDto.password().equals(registrationUserDto.confirmPassword())) {
             throw new PasswordNotMatchException("Passwords do not match.");
         }
-        userRepository.save(userMapper.toEntity(registrationUserDto, passwordEncoder));
+        userRepository.save(userMapper.toEntity(registrationUserDto, userDefaultPicture, passwordEncoder));
         return "User created successfully!";
     }
 
     @Override
-    @Transactional
     public JwtResponseDto authenticate(JwtRequestDto authRequest) {
 
         try {
