@@ -40,9 +40,14 @@ public class User implements UserDetails {
     String photoUrl;
 
     @ElementCollection
+    @CollectionTable(name = "user_followings", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "followings")
     List<Long> followings = new ArrayList<>();
 
+
     @ElementCollection
+    @CollectionTable(name = "user_followers", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "followers")
     List<Long> followers = new ArrayList<>();
 
     @CreationTimestamp

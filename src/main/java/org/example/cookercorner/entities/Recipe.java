@@ -36,9 +36,13 @@ public class Recipe {
     String cookingTime;
 
     @ElementCollection
+    @CollectionTable(name = "recipe_likes", joinColumns = @JoinColumn(name = "recipe_id"))
+    @Column(name = "likes")
     List<Long> likes = new ArrayList<>();
 
     @ElementCollection
+    @CollectionTable(name = "recipe_saves", joinColumns = @JoinColumn(name = "recipe_id"))
+    @Column(name = "saves")
     List<Long> saves = new ArrayList<>();
 
 

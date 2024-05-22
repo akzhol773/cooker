@@ -3,6 +3,7 @@ package org.example.cookercorner.services.Impl;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.cookercorner.component.JwtTokenUtils;
 import org.example.cookercorner.dtos.*;
@@ -26,6 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
+
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthServiceImpl implements AuthService {
 
@@ -34,10 +36,6 @@ public class AuthServiceImpl implements AuthService {
     AuthenticationManager authenticationManager;
     JwtTokenUtils jwtTokenUtils;
     UserMapper userMapper;
-
-
-    @Value("${userDefaultPicture}")
-    private static String userDefaultPicture;
 
     @Override
     @Transactional
@@ -48,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
         if (!registrationUserDto.password().equals(registrationUserDto.confirmPassword())) {
             throw new PasswordNotMatchException("Passwords do not match.");
         }
-        userRepository.save(userMapper.toEntity(registrationUserDto, userDefaultPicture, passwordEncoder));
+        userRepository.save(userMapper.toEntity(registrationUserDto, getDefaultAvatar(), passwordEncoder));
         return "User created successfully!";
     }
 
@@ -92,5 +90,9 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             throw new InvalidTokenException("Token is invalid!");
         }
+    }
+
+    private static String getDefaultAvatar(){
+        return System.getenv("DEFAULT_AVATAR");
     }
 }

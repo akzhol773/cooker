@@ -1,6 +1,7 @@
 package org.example.cookercorner.config;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.cookercorner.component.CustomUserDetails;
@@ -18,7 +19,7 @@ import org.springframework.web.cors.CorsConfiguration;
 
 @EnableWebSecurity
 @Configuration
-@RequiredArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SecurityConfig {
 
