@@ -2,7 +2,6 @@ package org.example.cookercorner.config;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.cookercorner.component.CustomUserDetails;
 import org.example.cookercorner.component.JwtAuthFilter;
